@@ -1,0 +1,45 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ant-dev-lab/nightmarquee",
+  "description": "16 cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
+  "repository": {
+    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp",
+    "source": "github"
+  },
+  "version": "0.1.2",
+  "websiteUrl": "https://nightmarquee.com",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "nightmarquee",
+      "version": "0.1.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "NIGHTMARQUEE_TOKEN",
+          "description": "API token for headless or CI use. On a workstation run nightmarquee_sign_in instead.",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        },
+        {
+          "name": "NIGHTMARQUEE_NO_TELEMETRY",
+          "description": "Set to 1 to stop sending the anonymous install ID and MCP client name.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        },
+        {
+          "name": "NIGHTMARQUEE_TIMEOUT_MS",
+          "description": "Per-request timeout in ms, default 10000. Invalid values fall back to the default.",
+          "isRequired": false,
+          "isSecret": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}

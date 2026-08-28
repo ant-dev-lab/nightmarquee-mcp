@@ -1,0 +1,50 @@
+{
+  "name": "nightmarquee",
+  "version": "0.1.2",
+  "mcpName": "io.github.ant-dev-lab/nightmarquee",
+  "description": "Cinematic website prompts with live previews, inside your editor. MCP server for Claude Code, Claude Desktop and Cursor.",
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "claude",
+    "cursor",
+    "prompts",
+    "ui",
+    "design"
+  ],
+  "license": "MIT",
+  "homepage": "https://nightmarquee.com",
+  "type": "module",
+  "bin": {
+    "nightmarquee": "dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.0.0",
+    "zod": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "typescript": "^5",
+    "vitest": "^4.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ant-dev-lab/nightmarquee-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp/issues"
+  }
+}
