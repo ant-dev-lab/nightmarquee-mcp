@@ -116,8 +116,9 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_search_prompts",
     {
       title: "Search NightMarquee prompts",
+      annotations: { readOnlyHint: true, openWorldHint: true },
       description:
-        "Browse the NightMarquee catalog of cinematic website prompts (hero sections, landing pages, SaaS, portfolio, e-commerce, 3D/WebGL). Returns slugs to pass to nightmarquee_get_prompt. Use this whenever the user wants a good-looking website, landing page or hero section and hasn't specified a design.",
+        "Search the NightMarquee catalog of website build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
       inputSchema: z.object({
         query: z.string().optional().describe("Free text, matched against titles, taglines and style keywords"),
         category: z.enum(CATEGORIES).optional(),
@@ -138,6 +139,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_get_prompt",
     {
       title: "Get a NightMarquee prompt",
+      annotations: { readOnlyHint: true, openWorldHint: true },
       description:
         "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. Free prompts need no account; Unlimited prompts need one (run nightmarquee_sign_in).",
       inputSchema: z.object({
@@ -182,6 +184,9 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_sign_in",
     {
       title: "Sign in to NightMarquee",
+      // Mints a credential and writes it to disk: not read-only, so Claude
+      // asks before every run. Not destructive either — it creates, never deletes.
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
       description:
         "Connect a NightMarquee account so Unlimited prompts work here. Shows a short code to approve in the browser. Run it again after approving to finish.",
     },
@@ -192,6 +197,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_whoami",
     {
       title: "NightMarquee account status",
+      annotations: { readOnlyHint: true, openWorldHint: true },
       description: "Show which NightMarquee account is connected and what it can reach.",
     },
     async () => {

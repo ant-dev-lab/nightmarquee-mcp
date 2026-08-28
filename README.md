@@ -99,9 +99,13 @@ and can be revoked from there; the next call falls back to free-only.
 | `NIGHTMARQUEE_TIMEOUT_MS` | Ceiling on every API request, in milliseconds. Defaults to `10000`; unparseable or non-positive values fall back to the default, and anything above `2147483647` is clamped to it. |
 | `NIGHTMARQUEE_NO_TELEMETRY` | Set to `1` (any non-empty value works) to stop sending the install ID and your client's name. See below for exactly what this does and doesn't cover. |
 
-## Privacy
+## Privacy Policy
 
-Credentials are stored at `~/.nightmarquee/credentials.json`, mode 0600.
+Full policy: <https://nightmarquee.com/privacy>
+
+### What is collected
+
+Credentials are stored locally at `~/.nightmarquee/credentials.json`, mode 0600.
 
 Fetching a prompt is an HTTP request to nightmarquee.com, so the server
 necessarily sees which prompt slug and tool dialect you asked for, and logs
@@ -115,14 +119,52 @@ On top of that, each request carries three headers by default:
   `claude-code/2.1.240`.
 - `x-nm-version` — the version of this package.
 
+If you are signed in, the request also carries a bearer token identifying your
+NightMarquee account.
+
+**Never sent, in any configuration:** the prompts or code you write, file
+paths, file contents, or anything else from your project.
+
+### How it is used and stored
+
+Request records are used to operate the service and to understand which prompts
+people use — nothing else. They are held in our Supabase database.
+
+### Opting out
+
 `NIGHTMARQUEE_NO_TELEMETRY=1` drops `x-nm-install` and `x-nm-client`.
 **`x-nm-version` is still sent**, and requests are still made and still logged
-server-side — the log rows just carry no install ID and no client name. If
-you are signed in, the bearer token identifies your account regardless of this
+server-side — the log rows just carry no install ID and no client name. If you
+are signed in, the bearer token identifies your account regardless of this
 setting.
 
-Never sent, in any configuration: the prompts or code you write, file paths,
-file contents, or anything else from your project.
+### Third-party sharing
+
+Your data is not sold, rented, or shared with third parties for their own
+purposes. It is processed only by the infrastructure providers running the
+service on our behalf: Vercel (hosting), Supabase (database), and Lemon Squeezy
+(payments, for subscribers only). No advertising or analytics networks receive
+any of it.
+
+### Retention
+
+Account data is kept while your account exists. Email
+<support@nightmarquee.com> to delete your account and we remove your data
+within 30 days, except records we must keep for tax and accounting (held by the
+merchant of record).
+
+Request records are not currently expired on a fixed schedule; they are deleted
+on request along with your account.
+
+Tokens and local credentials are under your control at any time: revoke a
+connected editor from your [account page](https://nightmarquee.com/account),
+which deletes the token outright, or delete `~/.nightmarquee/credentials.json`
+to remove the local copy.
+
+### Contact
+
+Privacy questions, data access, and deletion requests:
+<support@nightmarquee.com>
 
 ## License
 
