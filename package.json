@@ -20,7 +20,9 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "manifest.json",
+    "icon.png"
   ],
   "engines": {
     "node": ">=20"
@@ -29,7 +31,8 @@
     "build": "tsc -p tsconfig.json",
     "pretest": "npm run build",
     "test": "vitest run",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "build:mcpb": "node scripts/build-mcpb.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",

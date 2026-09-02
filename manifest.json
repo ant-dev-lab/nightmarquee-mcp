@@ -1,0 +1,77 @@
+{
+  "manifest_version": "0.2",
+  "name": "nightmarquee",
+  "display_name": "NightMarquee",
+  "version": "0.1.3",
+  "description": "Cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
+  "long_description": "Art-directed website prompts for hero sections, landing pages, SaaS, portfolio, e-commerce and 3D/WebGL scenes. Every prompt is registered as a real MCP prompt, so it appears in the command palette rather than waiting for the model to think of it, and each is written natively for the tool you are in. Every build has a live demo you can scroll before you spend a token. The free prompts work with no account; Unlimited unlocks the rest in-session via a short device code.",
+  "author": {
+    "name": "NightMarquee",
+    "url": "https://nightmarquee.com"
+  },
+  "homepage": "https://nightmarquee.com",
+  "documentation": "https://nightmarquee.com/mcp",
+  "support": "https://github.com/ant-dev-lab/nightmarquee-mcp/issues",
+  "icon": "icon.png",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "prompts",
+    "web-design",
+    "ui",
+    "claude",
+    "cursor",
+    "lovable",
+    "bolt"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {
+        "NIGHTMARQUEE_TOKEN": "${user_config.token}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "nightmarquee_search_prompts",
+      "description": "Search the catalog by keyword, category or tool."
+    },
+    {
+      "name": "nightmarquee_get_prompt",
+      "description": "Fetch one build spec, written for the tool you are in."
+    },
+    {
+      "name": "nightmarquee_sign_in",
+      "description": "Link an Unlimited account with a short device code."
+    },
+    {
+      "name": "nightmarquee_whoami",
+      "description": "Report the current account and entitlement."
+    }
+  ],
+  "prompts_generated": true,
+  "user_config": {
+    "token": {
+      "type": "string",
+      "title": "API token (optional)",
+      "description": "Only needed for headless or CI use. On a workstation, run the sign-in tool instead.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "runtimes": {
+      "node": ">=20"
+    }
+  }
+}
