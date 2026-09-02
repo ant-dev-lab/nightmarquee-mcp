@@ -1,6 +1,6 @@
 {
   "name": "nightmarquee",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "mcpName": "io.github.ant-dev-lab/nightmarquee",
   "description": "Cinematic website prompts with live previews, inside your editor. MCP server for Claude Code, Claude Desktop and Cursor.",
   "keywords": [

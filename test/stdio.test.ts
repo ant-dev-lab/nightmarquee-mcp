@@ -245,4 +245,65 @@ describe("the built binary over stdio", () => {
       base = previous;
     }
   }, 20_000);
+
+  // Declaring an outputSchema makes the SDK reject any result that lacks
+  // structured content, so these calls fail loudly if a handler forgets it or
+  // returns a shape the schema does not accept. That check only fires at call
+  // time, which is why it is exercised over real stdio rather than unit-tested.
+  it("advertises an output schema on every tool and honours it when called", async () => {
+    const wire = await rpc(
+      [
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2025-06-18",
+            capabilities: {},
+            clientInfo: { name: "vitest", version: "1.0.0" },
+          },
+        },
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        { jsonrpc: "2.0", id: 2, method: "tools/list" },
+        {
+          jsonrpc: "2.0",
+          id: 3,
+          method: "tools/call",
+          params: { name: "nightmarquee_search_prompts", arguments: {} },
+        },
+        {
+          jsonrpc: "2.0",
+          id: 4,
+          method: "tools/call",
+          params: { name: "nightmarquee_whoami", arguments: {} },
+        },
+      ],
+      [1, 2, 3, 4]
+    );
+
+    const tools = wire.messages.find((r) => r.id === 2) as {
+      result?: { tools?: { name: string; outputSchema?: unknown }[] };
+    };
+    const withSchema = (tools?.result?.tools ?? []).filter((t) => t.outputSchema);
+    expect(withSchema.length, `stderr:\n${wire.stderr}`).toBe(4);
+
+    const search = wire.messages.find((r) => r.id === 3) as {
+      result?: { structuredContent?: { total?: number; results?: { slug: string }[] } };
+      error?: unknown;
+    };
+    expect(search?.error, `stderr:\n${wire.stderr}`).toBeUndefined();
+    expect(search?.result?.structuredContent?.total).toBe(1);
+    expect(search?.result?.structuredContent?.results?.[0]?.slug).toBe("isola");
+
+    // Signed out: the structured half must still be present and well formed.
+    const who = wire.messages.find((r) => r.id === 4) as {
+      result?: { structuredContent?: { signedIn?: boolean; message?: string } };
+      error?: unknown;
+    };
+    expect(who?.error, `stderr:\n${wire.stderr}`).toBeUndefined();
+    expect(who?.result?.structuredContent?.signedIn).toBe(false);
+    expect(who?.result?.structuredContent?.message).toMatch(/not signed in/i);
+
+    expect(wire.junk).toEqual([]);
+  }, 20_000);
 });

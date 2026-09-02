@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "nightmarquee",
   "display_name": "NightMarquee",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
   "long_description": "Art-directed website prompts for hero sections, landing pages, SaaS, portfolio, e-commerce and 3D/WebGL scenes. Every prompt is registered as a real MCP prompt, so it appears in the command palette rather than waiting for the model to think of it, and each is written natively for the tool you are in. Every build has a live demo you can scroll before you spend a token. The free prompts work with no account; Unlimited unlocks the rest in-session via a short device code.",
   "author": {
