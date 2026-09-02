@@ -1,7 +1,7 @@
 {
   "name": "nightmarquee",
   "displayName": "NightMarquee",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "16 cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude. Five are free and need no account.",
   "author": {
     "name": "NightMarquee",
@@ -18,11 +18,5 @@
     "frontend",
     "landing-page",
     "animation"
-  ],
-  "mcpServers": {
-    "nightmarquee": {
-      "command": "npx",
-      "args": ["-y", "nightmarquee"]
-    }
-  }
+  ]
 }
