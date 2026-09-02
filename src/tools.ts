@@ -116,14 +116,33 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_search_prompts",
     {
       title: "Search NightMarquee prompts",
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      // All four hints, not just the true ones: a partial set reads as
+      // "unspecified" to clients and scorers alike.
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
       description:
         "Search the NightMarquee catalog of website build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
       inputSchema: z.object({
         query: z.string().optional().describe("Free text, matched against titles, taglines and style keywords"),
-        category: z.enum(CATEGORIES).optional(),
-        tier: z.enum(["free", "unlimited"]).optional(),
-        limit: z.number().int().min(1).max(50).optional(),
+        category: z
+          .enum(CATEGORIES)
+          .optional()
+          .describe("Restrict to one section of the catalog"),
+        tier: z
+          .enum(["free", "unlimited"])
+          .optional()
+          .describe("\"free\" needs no account; \"unlimited\" needs a signed-in Unlimited plan"),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(50)
+          .optional()
+          .describe("How many matches to return, 1 to 50, default 10"),
       }),
     },
     async (args) => {
@@ -139,7 +158,12 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_get_prompt",
     {
       title: "Get a NightMarquee prompt",
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
       description:
         "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. Free prompts need no account; Unlimited prompts need one (run nightmarquee_sign_in).",
       inputSchema: z.object({
@@ -186,7 +210,13 @@ export function registerTools(server: McpServer, session: () => Session): void {
       title: "Sign in to NightMarquee",
       // Mints a credential and writes it to disk: not read-only, so Claude
       // asks before every run. Not destructive either — it creates, never deletes.
-      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        // Re-running mints a new code rather than repeating the last one.
+        idempotentHint: false,
+        openWorldHint: true,
+      },
       description:
         "Connect a NightMarquee account so Unlimited prompts work here. Shows a short code to approve in the browser. Run it again after approving to finish.",
     },
@@ -197,7 +227,12 @@ export function registerTools(server: McpServer, session: () => Session): void {
     "nightmarquee_whoami",
     {
       title: "NightMarquee account status",
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
       description: "Show which NightMarquee account is connected and what it can reach.",
     },
     async () => {

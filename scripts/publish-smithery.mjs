@@ -105,7 +105,16 @@ const payload = {
         "Art-directed website prompts delivered as slash commands in Claude Code, Claude Desktop and Cursor.",
     },
     tools: r[2].tools.map((t) =>
-      pick(t, ["name", "title", "description", "inputSchema"])
+      pick(t, [
+        "name",
+        "title",
+        "description",
+        "inputSchema",
+        "outputSchema",
+        // The server sets these and Smithery scores them; forgetting to
+        // forward them silently costs points on a listing that looks fine.
+        "annotations",
+      ])
     ),
     prompts: (r[3]?.prompts ?? []).map((p) =>
       pick(p, ["name", "title", "description", "arguments"])
