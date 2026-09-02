@@ -1,0 +1,28 @@
+{
+  "name": "nightmarquee",
+  "displayName": "NightMarquee",
+  "version": "0.1.2",
+  "description": "16 cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude. Five are free and need no account.",
+  "author": {
+    "name": "NightMarquee",
+    "email": "support@nightmarquee.com",
+    "url": "https://nightmarquee.com"
+  },
+  "homepage": "https://nightmarquee.com/mcp",
+  "repository": "https://github.com/ant-dev-lab/nightmarquee-mcp",
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "website",
+    "prompts",
+    "frontend",
+    "landing-page",
+    "animation"
+  ],
+  "mcpServers": {
+    "nightmarquee": {
+      "command": "npx",
+      "args": ["-y", "nightmarquee"]
+    }
+  }
+}
