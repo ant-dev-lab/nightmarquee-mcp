@@ -32,7 +32,8 @@
     "pretest": "npm run build",
     "test": "vitest run",
     "prepublishOnly": "npm run build",
-    "build:mcpb": "node scripts/build-mcpb.mjs"
+    "build:mcpb": "node scripts/build-mcpb.mjs",
+    "publish:smithery": "node scripts/publish-smithery.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.0.0",
