@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.ant-dev-lab/nightmarquee",
-  "description": "16 cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
+  "description": "Cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
   "repository": {
     "url": "https://github.com/ant-dev-lab/nightmarquee-mcp",
     "source": "github"

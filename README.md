@@ -2,9 +2,9 @@
 
 Cinematic website prompts with live previews, inside your editor.
 
-16 art-directed prompts for hero sections, landing pages, SaaS, portfolio,
-e-commerce and 3D/WebGL scenes — each tuned for Lovable, Bolt, Cursor and
-Claude, each with a live demo you can scroll.
+Art-directed prompts for hero sections, landing pages, SaaS, portfolio,
+e-commerce and 3D/WebGL scenes. Each is tuned for Lovable, Bolt, Cursor and
+Claude, and each has a live demo you can scroll.
 
 An MCP (Model Context Protocol) stdio server. Node 20 or newer.
 
@@ -16,7 +16,7 @@ An MCP (Model Context Protocol) stdio server. Node 20 or newer.
 claude mcp add nightmarquee -- npx -y nightmarquee
 ```
 
-**Claude Desktop / Cursor** — add to your MCP config:
+**Claude Desktop / Cursor**: add to your MCP config:
 
 ```json
 {
@@ -37,11 +37,11 @@ No account needed. Free prompts work immediately.
 
 ## Use
 
-- `nightmarquee_search_prompts` — browse by `query`, `category` or `tier`
-- `nightmarquee_get_prompt` — fetch one by `slug`, optionally with your own
+- `nightmarquee_search_prompts`: browse by `query`, `category` or `tier`
+- `nightmarquee_get_prompt`: fetch one by `slug`, optionally with your own
   `brand` name and a `tool` dialect (`lovable`, `bolt`, `cursor`, `claude`)
-- `nightmarquee_sign_in` — connect an account to unlock Unlimited prompts
-- `nightmarquee_whoami` — check what's connected
+- `nightmarquee_sign_in`: connect an account to unlock Unlimited prompts
+- `nightmarquee_whoami`: check what's connected
 
 Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce` and `3d`.
 
@@ -60,7 +60,7 @@ slash command per design:
 /mcp__nightmarquee__glasshouse-nine
 ```
 
-Other clients surface MCP prompts their own way — Claude Desktop lists them in
+Other clients surface MCP prompts their own way. Claude Desktop lists them in
 the attachment (`+`) menu. The list is built from the catalog fetched at
 startup, so if the server can't reach nightmarquee.com when your editor
 launches, the tools still work but the per-prompt commands won't appear until
@@ -68,9 +68,10 @@ you restart.
 
 ## Unlimited
 
-5 of the 16 prompts are free: `glasshouse-nine`, `aetheris-voyage`,
-`nordlys-fintech`, `solstice-festival` and `lumen-observatory`. The other 11
-need [Unlimited](https://nightmarquee.com/pricing?ref=mcp).
+Some prompts are free, currently `glasshouse-nine`, `aetheris-voyage`,
+`nordlys-fintech`, `solstice-festival` and `lumen-observatory`. The rest need
+[Unlimited](https://nightmarquee.com/pricing?ref=mcp). Run
+`nightmarquee_search_prompts` with `tier: "free"` for the live list.
 
 Run `nightmarquee_sign_in` and approve the code in your browser. It waits about
 a minute; if you took longer, run it again and it picks up the same request
@@ -113,11 +114,11 @@ that. That is true in every configuration.
 
 On top of that, each request carries three headers by default:
 
-- `x-nm-install` — a random UUID generated on your machine on first run and
+- `x-nm-install`: a random UUID generated on your machine on first run and
   kept in `credentials.json`. Not derived from anything, tied to nothing else.
-- `x-nm-client` — the name and version your MCP client reports, e.g.
+- `x-nm-client`: the name and version your MCP client reports, e.g.
   `claude-code/2.1.240`.
-- `x-nm-version` — the version of this package.
+- `x-nm-version`: the version of this package.
 
 If you are signed in, the request also carries a bearer token identifying your
 NightMarquee account.
@@ -128,13 +129,13 @@ paths, file contents, or anything else from your project.
 ### How it is used and stored
 
 Request records are used to operate the service and to understand which prompts
-people use — nothing else. They are held in our Supabase database.
+people use, nothing else. They are held in our Supabase database.
 
 ### Opting out
 
 `NIGHTMARQUEE_NO_TELEMETRY=1` drops `x-nm-install` and `x-nm-client`.
 **`x-nm-version` is still sent**, and requests are still made and still logged
-server-side — the log rows just carry no install ID and no client name. If you
+server-side, and the log rows just carry no install ID and no client name. If you
 are signed in, the bearer token identifies your account regardless of this
 setting.
 
