@@ -8,7 +8,10 @@
  * zips this package would resolve nothing on a user's machine. We therefore
  * stage a clean tree and install production deps into it.
  *
- * Output: build/nightmarquee-<version>.mcpb (gitignored).
+ * Output: build/nightmarquee.mcpb (gitignored). The filename deliberately
+ * carries no version: it is uploaded to GitHub Releases under this name so
+ * https://.../releases/latest/download/nightmarquee.mcpb keeps working across
+ * bumps. The version lives in the manifest and the release tag.
  */
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
@@ -59,7 +62,7 @@ const run = (cmd, args, cwd) =>
 
 run("npm", ["install", "--omit=dev", "--no-audit", "--no-fund"], stage);
 
-const out = join(build, `nightmarquee-${pkg.version}.mcpb`);
+const out = join(build, "nightmarquee.mcpb");
 run("npx", ["-y", "@anthropic-ai/mcpb@2.1.2", "pack", stage, out], pkgRoot);
 run("npx", ["-y", "@anthropic-ai/mcpb@2.1.2", "clean", out], pkgRoot);
 
