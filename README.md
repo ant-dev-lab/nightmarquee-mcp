@@ -43,7 +43,7 @@ No account needed. Free prompts work immediately.
 - `nightmarquee_sign_in`: connect an account to unlock Unlimited prompts
 - `nightmarquee_whoami`: check what's connected
 
-Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce` and `3d`.
+Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce`, `3d` and `mobile`.
 
 Ask for a design in plain language and the model will usually reach for
 `nightmarquee_search_prompts` on its own. Or drive it directly:

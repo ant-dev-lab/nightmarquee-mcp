@@ -6,7 +6,7 @@ import { activeToken } from "./creds.js";
 import { signIn } from "./device.js";
 
 const TOOL_IDS = ["lovable", "bolt", "cursor", "claude"] as const;
-const CATEGORIES = ["hero", "landing", "saas", "portfolio", "ecommerce", "3d"] as const;
+const CATEGORIES = ["hero", "landing", "saas", "portfolio", "ecommerce", "3d", "mobile"] as const;
 
 const text = (value: string) => ({ content: [{ type: "text" as const, text: value }] });
 
@@ -178,7 +178,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Search the NightMarquee catalog of website build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
+        "Search the NightMarquee catalog of website and mobile app build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d, mobile) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
       inputSchema: z.object({
         query: z.string().optional().describe("Free text, matched against titles, taglines and style keywords"),
         category: z

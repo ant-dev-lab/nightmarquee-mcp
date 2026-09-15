@@ -6,14 +6,14 @@
     "url": "https://github.com/ant-dev-lab/nightmarquee-mcp",
     "source": "github"
   },
-  "version": "0.1.4",
+  "version": "0.1.5",
   "websiteUrl": "https://nightmarquee.com",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "nightmarquee",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "transport": {
         "type": "stdio"
       },
