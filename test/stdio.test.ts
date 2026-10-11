@@ -11,7 +11,7 @@ const binary = join(pkgRoot, "dist", "index.js");
 
 const CATALOG = {
   version: 1,
-  tools: ["lovable", "bolt", "cursor", "claude"],
+  tools: ["lovable", "bolt", "cursor", "claude", "codex"],
   categories: [],
   prompts: [
     {
@@ -31,13 +31,36 @@ const CATALOG = {
   ],
 };
 
+const FOOTAGE_URL =
+  "https://acct.r2.cloudflarestorage.com/nightmarquee-footage/isola/hero.mp4?X-Amz-Expires=600&X-Amz-Signature=abc";
+
+/** What /api/mcp/prompt/isola returns to an entitled caller of a footage drop. */
+const PROMPT = {
+  entitled: true,
+  tier: "unlimited",
+  tool: "claude",
+  title: "Isola",
+  text: "Build a fragrance hero.",
+  demoUrl: "http://x/demo/isola",
+  footage: [{ name: "hero.mp4", role: "Bottle turntable", seconds: 5, bytes: 2_900_000, url: FOOTAGE_URL }],
+  footageExpiresInSeconds: 600,
+};
+
 let http: Server;
 let base: string;
+/** Every path the server asked the API for, so a test can see the dialect it sent. */
+const requested: string[] = [];
 
 beforeAll(async () => {
-  http = createServer((_req, res) => {
+  http = createServer((req, res) => {
+    requested.push(req.url ?? "");
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify(CATALOG));
+    const body = req.url?.startsWith("/api/mcp/prompt/")
+      ? PROMPT
+      : req.url?.startsWith("/api/footage/")
+        ? { slug: "isola", expiresInSeconds: 600, clips: PROMPT.footage }
+        : CATALOG;
+    res.end(JSON.stringify(body));
   });
   await new Promise<void>((r) => http.listen(0, "127.0.0.1", r));
   base = `http://127.0.0.1:${(http.address() as { port: number }).port}`;
@@ -156,13 +179,24 @@ describe("the built binary over stdio", () => {
     );
 
     const tools = wire.messages.find((r) => r.id === 2) as {
-      result?: { tools?: { name: string }[] };
+      result?: {
+        tools?: {
+          name: string;
+          inputSchema?: { properties?: Record<string, { enum?: string[] }> };
+        }[];
+      };
     };
     expect(tools?.result?.tools?.map((t) => t.name).sort()).toEqual([
+      "nightmarquee_get_footage",
       "nightmarquee_get_prompt",
       "nightmarquee_search_prompts",
       "nightmarquee_sign_in",
       "nightmarquee_whoami",
+    ]);
+    // What a client's model sees: Codex can only ask for a dialect listed here.
+    const getPrompt = tools?.result?.tools?.find((t) => t.name === "nightmarquee_get_prompt");
+    expect(getPrompt?.inputSchema?.properties?.tool?.enum).toEqual([
+      "lovable", "bolt", "cursor", "claude", "codex",
     ]);
 
     // The locked entry still lists: the paid catalog living in the command
@@ -171,6 +205,36 @@ describe("the built binary over stdio", () => {
       result?: { prompts?: { name: string }[] };
     };
     expect(prompts?.result?.prompts?.map((p) => p.name)).toContain("isola");
+  }, 20_000);
+
+  it("asks for the Codex dialect from Codex even with telemetry off", async () => {
+    // rpc() sets NIGHTMARQUEE_NO_TELEMETRY, so no x-nm-client header reaches the API.
+    requested.length = 0;
+    const wire = await rpc(
+      [
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2025-06-18",
+            capabilities: {},
+            clientInfo: { name: "codex-mcp-client", version: "0.160.1" },
+          },
+        },
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        {
+          jsonrpc: "2.0",
+          id: 2,
+          method: "tools/call",
+          params: { name: "nightmarquee_get_prompt", arguments: { slug: "isola" } },
+        },
+      ],
+      [1, 2]
+    );
+    expect(requested.filter((u) => u.startsWith("/api/mcp/prompt/")), `stderr:\n${wire.stderr}`).toEqual([
+      "/api/mcp/prompt/isola?tool=codex",
+    ]);
   }, 20_000);
 
   it("writes nothing but JSON-RPC to stdout", async () => {
@@ -229,7 +293,7 @@ describe("the built binary over stdio", () => {
       const tools = wire.messages.find((r) => r.id === 2) as {
         result?: { tools?: { name: string }[] };
       };
-      expect(tools?.result?.tools?.length, `stderr:\n${wire.stderr}`).toBe(4);
+      expect(tools?.result?.tools?.length, `stderr:\n${wire.stderr}`).toBe(5);
 
       // Zero prompts means the SDK never declares the prompts capability, so
       // the client is told the method is absent. An answer either way is the
@@ -285,7 +349,7 @@ describe("the built binary over stdio", () => {
       result?: { tools?: { name: string; outputSchema?: unknown }[] };
     };
     const withSchema = (tools?.result?.tools ?? []).filter((t) => t.outputSchema);
-    expect(withSchema.length, `stderr:\n${wire.stderr}`).toBe(4);
+    expect(withSchema.length, `stderr:\n${wire.stderr}`).toBe(5);
 
     const search = wire.messages.find((r) => r.id === 3) as {
       result?: { structuredContent?: { total?: number; results?: { slug: string }[] } };
@@ -304,6 +368,69 @@ describe("the built binary over stdio", () => {
     expect(who?.result?.structuredContent?.signedIn).toBe(false);
     expect(who?.result?.structuredContent?.message).toMatch(/not signed in/i);
 
+    expect(wire.junk).toEqual([]);
+  }, 20_000);
+
+  // The footage array is new in 0.1.6. If its schema and the structured
+  // output disagree, the SDK fails the call, and only a real call shows it.
+  it("returns footage links from get_prompt and get_footage within their output schemas", async () => {
+    const wire = await rpc(
+      [
+        {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "initialize",
+          params: {
+            protocolVersion: "2025-06-18",
+            capabilities: {},
+            clientInfo: { name: "vitest", version: "1.0.0" },
+          },
+        },
+        { jsonrpc: "2.0", method: "notifications/initialized" },
+        { jsonrpc: "2.0", id: 2, method: "tools/list" },
+        {
+          jsonrpc: "2.0",
+          id: 3,
+          method: "tools/call",
+          params: { name: "nightmarquee_get_prompt", arguments: { slug: "isola" } },
+        },
+        {
+          jsonrpc: "2.0",
+          id: 4,
+          method: "tools/call",
+          params: { name: "nightmarquee_get_footage", arguments: { slug: "isola" } },
+        },
+      ],
+      [1, 2, 3, 4]
+    );
+
+    const tools = wire.messages.find((r) => r.id === 2) as {
+      result?: { tools?: { name: string; outputSchema?: { properties?: Record<string, unknown> } }[] };
+    };
+    const getPrompt = tools?.result?.tools?.find((t) => t.name === "nightmarquee_get_prompt");
+    expect(getPrompt?.outputSchema?.properties, `stderr:\n${wire.stderr}`).toHaveProperty("footage");
+
+    const call = wire.messages.find((r) => r.id === 3) as {
+      result?: {
+        isError?: boolean;
+        content?: { text?: string }[];
+        structuredContent?: { footage?: { name: string; url: string }[] };
+      };
+      error?: unknown;
+    };
+    expect(call?.error, `stderr:\n${wire.stderr}`).toBeUndefined();
+    expect(call?.result?.isError ?? false).toBe(false);
+    expect(call?.result?.structuredContent?.footage).toEqual([
+      expect.objectContaining({ name: "hero.mp4", url: FOOTAGE_URL }),
+    ]);
+    expect(call?.result?.content?.[0]?.text).toContain(FOOTAGE_URL);
+
+    const footage = wire.messages.find((r) => r.id === 4) as typeof call;
+    expect(footage?.error, `stderr:\n${wire.stderr}`).toBeUndefined();
+    expect(footage?.result?.isError ?? false).toBe(false);
+    expect(footage?.result?.structuredContent?.footage).toEqual([
+      expect.objectContaining({ name: "hero.mp4", url: FOOTAGE_URL }),
+    ]);
     expect(wire.junk).toEqual([]);
   }, 20_000);
 });

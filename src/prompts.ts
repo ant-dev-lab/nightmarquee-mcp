@@ -2,9 +2,8 @@ import type { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod";
 import { apiGet, type CatalogPrompt, type PromptBody, type Session } from "./api.js";
 import { getCatalog } from "./catalog.js";
+import { DIALECT_HELP, TOOL_IDS, dialectFor } from "./dialects.js";
 import { formatPrompt } from "./tools.js";
-
-const TOOL_IDS = ["lovable", "bolt", "cursor", "claude"] as const;
 
 /**
  * One MCP prompt per catalog entry, so the catalog lands in the client's
@@ -61,12 +60,13 @@ function registerOne(
         tool: z
           .enum(TOOL_IDS)
           .optional()
-          .describe("Target tool dialect, defaults to claude"),
+          .describe(DIALECT_HELP),
       }),
     },
     async ({ brand, tool }) => {
       const params = new URLSearchParams();
-      if (tool) params.set("tool", tool);
+      const dialect = dialectFor(tool, session().client);
+      if (dialect) params.set("tool", dialect);
       if (brand) params.set("brand", brand);
       const query = params.toString() ? `?${params}` : "";
 

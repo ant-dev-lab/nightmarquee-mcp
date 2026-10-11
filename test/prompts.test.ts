@@ -178,6 +178,30 @@ describe("registerCatalogPrompts", () => {
     expect(url).toBe("http://api.test/api/mcp/prompt/isola?tool=cursor&brand=Halcyon");
   });
 
+  it("hands the footage links to the slash command too", async () => {
+    fetchMock.mockResolvedValueOnce(
+      json({ version: 1, tools: [], categories: [], prompts: [entry()] })
+    );
+    const { registered, server } = fakeServer();
+    await registerCatalogPrompts(server, () => session());
+
+    const url = "https://acct.r2.cloudflarestorage.com/nightmarquee-footage/isola/hero.mp4?X-Amz-Signature=abc";
+    fetchMock.mockResolvedValueOnce(
+      json({
+        entitled: true,
+        tier: "unlimited",
+        text: "the body",
+        footage: [{ name: "hero.mp4", role: "Bottle turntable", seconds: 5, bytes: 2_900_000, url }],
+        footageExpiresInSeconds: 600,
+      })
+    );
+
+    const text = (await registered[0].cb({})).messages[0].content.text;
+    expect(text).toContain("the body");
+    expect(text).toContain(url);
+    expect(text).toMatch(/public\//);
+  });
+
   it("degrades to readable text when the body fetch fails", async () => {
     fetchMock.mockResolvedValueOnce(
       json({ version: 1, tools: [], categories: [], prompts: [entry()] })

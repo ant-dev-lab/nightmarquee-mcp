@@ -29,6 +29,16 @@ export interface Catalog {
   prompts: CatalogPrompt[];
 }
 
+/** One clip of a demo's footage, with a short-lived signed download link. */
+export interface FootageLink {
+  /** The file name to save it under, "hero.mp4". */
+  name: string;
+  role: string;
+  seconds: number;
+  bytes: number;
+  url: string;
+}
+
 export interface PromptBody {
   entitled: boolean;
   tier: string;
@@ -39,6 +49,11 @@ export interface PromptBody {
   signedIn?: boolean;
   teaser?: string;
   upsell?: { pricingUrl: string; message: string };
+  /** Present when the caller may download the demo's footage. */
+  footage?: FootageLink[];
+  footageExpiresInSeconds?: number;
+  /** Why a demo with footage came without links. */
+  footageMessage?: string;
 }
 
 export class ApiError extends Error {

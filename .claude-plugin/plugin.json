@@ -1,8 +1,8 @@
 {
   "name": "nightmarquee",
   "displayName": "NightMarquee",
-  "version": "0.1.5",
-  "description": "Cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude. Free prompts need no account.",
+  "version": "0.1.6",
+  "description": "Cinematic website prompts plus demo footage, tuned for Lovable, Bolt, Cursor, Claude and Codex. Free prompts need no account.",
   "author": {
     "name": "NightMarquee",
     "email": "support@nightmarquee.com",

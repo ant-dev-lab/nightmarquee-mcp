@@ -3,8 +3,8 @@
 Cinematic website prompts with live previews, inside your editor.
 
 Art-directed prompts for hero sections, landing pages, SaaS, portfolio,
-e-commerce and 3D/WebGL scenes. Each is tuned for Lovable, Bolt, Cursor and
-Claude, and each has a live demo you can scroll.
+e-commerce and 3D/WebGL scenes. Each is tuned for Lovable, Bolt, Cursor,
+Claude and Codex, and each has a live demo you can scroll.
 
 An MCP (Model Context Protocol) stdio server. Node 20 or newer.
 
@@ -33,13 +33,35 @@ Claude Desktop reads `~/Library/Application Support/Claude/claude_desktop_config
 on macOS and `%APPDATA%\Claude\claude_desktop_config.json` on Windows. Cursor
 reads `~/.cursor/mcp.json`, or `.cursor/mcp.json` inside a project.
 
+**Codex**: the CLI, the IDE extension and the ChatGPT app share one config.
+
+```bash
+codex mcp add nightmarquee -- npx -y nightmarquee
+```
+
+That writes this to `~/.codex/config.toml`, which you can also add by hand
+(or to `.codex/config.toml` in a trusted project):
+
+```toml
+[mcp_servers.nightmarquee]
+command = "npx"
+args = ["-y", "nightmarquee"]
+```
+
+Codex uses the tools but does not show MCP prompts as commands yet, so ask for
+a design in plain language and it calls `nightmarquee_search_prompts`. Prompts
+come back in the Codex dialect unless you pass another `tool`.
+
 No account needed. Free prompts work immediately.
 
 ## Use
 
 - `nightmarquee_search_prompts`: browse by `query`, `category` or `tier`
 - `nightmarquee_get_prompt`: fetch one by `slug`, optionally with your own
-  `brand` name and a `tool` dialect (`lovable`, `bolt`, `cursor`, `claude`)
+  `brand` name and a `tool` dialect (`lovable`, `bolt`, `cursor`, `claude`,
+  `codex`). Without one you get `codex` in Codex and `claude` elsewhere
+- `nightmarquee_get_footage`: fresh download links for a demo's footage, when
+  the ones from `nightmarquee_get_prompt` have expired
 - `nightmarquee_sign_in`: connect an account to unlock Unlimited prompts
 - `nightmarquee_whoami`: check what's connected
 
@@ -61,15 +83,34 @@ slash command per design:
 ```
 
 Other clients surface MCP prompts their own way. Claude Desktop lists them in
-the attachment (`+`) menu. The list is built from the catalog fetched at
+the attachment (`+`) menu; Codex does not list them yet. The list is built from the catalog fetched at
 startup, so if the server can't reach nightmarquee.com when your editor
 launches, the tools still work but the per-prompt commands won't appear until
 you restart.
 
+## Footage
+
+Most demos play video. When your account may download it, `nightmarquee_get_prompt`
+returns the footage from the demo, every clip, with a signed link per file, and
+the prompt text ends with a note naming each clip. The agent downloads the files
+into `public/` under their names and then builds, so the page you get plays the
+same footage as the demo. The links last 10 minutes; `nightmarquee_get_footage`
+fetches fresh ones without the prompt.
+
+A free prompt's footage needs a free account, and the rest come with
+Unlimited. Without an account, the prompt text still arrives in full, with one
+line saying how many clips the demo plays and that `nightmarquee_sign_in` gets
+them. Each account can fetch 30 packs an hour, shared with downloads on the
+site.
+
+In Lovable and Bolt, download the files from the prompt page on
+nightmarquee.com and upload them there.
+
 ## Unlimited
 
 Some prompts are free, currently `glasshouse-nine`, `aetheris-voyage`,
-`nordlys-fintech`, `solstice-festival` and `lumen-observatory`. The rest need
+`nordlys-fintech`, `solstice-festival`, `lumen-observatory`, `sumi-atelier`,
+`wren` and `fieldnote`. The rest need
 [Unlimited](https://nightmarquee.com/pricing?ref=mcp). Run
 `nightmarquee_search_prompts` with `tier: "free"` for the live list.
 
@@ -117,7 +158,8 @@ On top of that, each request carries three headers by default:
 - `x-nm-install`: a random UUID generated on your machine on first run and
   kept in `credentials.json`. Not derived from anything, tied to nothing else.
 - `x-nm-client`: the name and version your MCP client reports, e.g.
-  `claude-code/2.1.240`.
+  `claude-code/2.1.240`. In Codex this package also asks for the Codex dialect
+  itself, so turning telemetry off does not change which prompt text you get.
 - `x-nm-version`: the version of this package.
 
 If you are signed in, the request also carries a bearer token identifying your

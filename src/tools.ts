@@ -1,14 +1,30 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod";
-import { ApiError, apiGet, type Catalog, type PromptBody, type Session } from "./api.js";
+import {
+  ApiError,
+  apiGet,
+  type Catalog,
+  type FootageLink,
+  type PromptBody,
+  type Session,
+} from "./api.js";
 import { getCatalog } from "./catalog.js";
 import { activeToken } from "./creds.js";
 import { signIn } from "./device.js";
+import { DIALECT_HELP, TOOL_IDS, dialectFor } from "./dialects.js";
 
-const TOOL_IDS = ["lovable", "bolt", "cursor", "claude"] as const;
 const CATEGORIES = ["hero", "landing", "saas", "portfolio", "ecommerce", "3d", "mobile"] as const;
 
-const text = (value: string) => ({ content: [{ type: "text" as const, text: value }] });
+/** One clip with its signed link, as get_prompt and get_footage both return it. */
+const FOOTAGE_LIST = z.array(
+  z.object({
+    name: z.string().describe("Save the file under this name, in public/"),
+    role: z.string().describe("What the clip shows and how the demo uses it"),
+    seconds: z.number(),
+    bytes: z.number(),
+    url: z.string().describe("Signed download link, valid for footageExpiresInSeconds"),
+  })
+);
 
 /**
  * Text plus machine-readable output. Every tool declares an outputSchema, and
@@ -61,12 +77,49 @@ export function searchStructured(catalog: Catalog, args: SearchArgs) {
   };
 }
 
+/** A plain file name: no folders, no leading dot, nothing a shell would split. */
+const SAFE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
+
+const isCount = (value: unknown): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value >= 0;
+
+function isHttps(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The clips an entitled response carries, keeping only well-formed ones. The
+ * agent saves each under its name, so a name is a path on the user's disk:
+ * the server builds them from its own pack list, but the package does not
+ * take that on trust, and a malformed entry must not fail output validation.
+ */
+export function footageLinks(body: PromptBody): FootageLink[] {
+  return body.entitled === true ? safeClips(body.footage) : [];
+}
+
+function safeClips(raw: unknown): FootageLink[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((clip: unknown) => {
+    const c = clip as Partial<FootageLink> | null;
+    if (!c || typeof c !== "object") return [];
+    if (typeof c.name !== "string" || !SAFE_NAME.test(c.name)) return [];
+    if (typeof c.role !== "string" || !isCount(c.seconds) || !isCount(c.bytes) || !isHttps(c.url)) return [];
+    return [{ name: c.name, role: c.role, seconds: c.seconds, bytes: c.bytes, url: c.url }];
+  });
+}
+
 /** The structured half of a fetch. `entitled` is the field that decides everything. */
 export function promptStructured(body: PromptBody, slug: string) {
   // Coerced, not trusted: the schema requires a boolean, and a malformed
   // response would otherwise fail output validation instead of reading as
   // "not entitled", which is the safe reading anyway.
   const entitled = body.entitled === true;
+  const footage = footageLinks(body);
   return {
     slug,
     entitled,
@@ -76,6 +129,11 @@ export function promptStructured(body: PromptBody, slug: string) {
     text: entitled ? body.text : undefined,
     demoUrl: body.demoUrl,
     pricingUrl: entitled ? undefined : body.upsell?.pricingUrl,
+    footage: footage.length ? footage : undefined,
+    footageExpiresInSeconds:
+      footage.length && isCount(body.footageExpiresInSeconds) ? body.footageExpiresInSeconds : undefined,
+    footageMessage:
+      entitled && !footage.length && typeof body.footageMessage === "string" ? body.footageMessage : undefined,
   };
 }
 
@@ -102,10 +160,100 @@ export function formatSearch(catalog: Catalog, args: SearchArgs): string {
   return `${lines.join("\n\n")}\n\nFetch one with nightmarquee_get_prompt(slug).`;
 }
 
+/**
+ * What the agent should do with the footage: the files go where the build
+ * expects them before it starts, while the links still work. Shared by
+ * get_prompt and get_footage, so both give the same steps.
+ */
+function footageSteps(clips: FootageLink[], expiresInSeconds: unknown, slug: string): string {
+  const seconds = isCount(expiresInSeconds) ? expiresInSeconds : 600;
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  const lines = clips.map(
+    (c) => `- ${c.name}: ${c.role}, ${c.seconds}s, ${(c.bytes / 1_000_000).toFixed(1)} MB\n  ${c.url}`
+  );
+  return [
+    `Footage pack: the clips this demo plays. The links expire in ${minutes} minutes.`,
+    "Download each file into public/ under the name shown (for a single index.html with no build step, next to index.html), then build. Quote each link in the shell, because it contains & characters:",
+    `curl -fL --create-dirs -o public/${clips[0].name} "<link for ${clips[0].name}>"`,
+    `If the links have expired, run nightmarquee_get_footage(slug: "${slug}") for fresh ones.`,
+    "",
+    ...lines,
+  ].join("\n");
+}
+
+function formatFootage(body: PromptBody, slug: string): string {
+  const clips = footageLinks(body);
+  if (clips.length === 0) {
+    return typeof body.footageMessage === "string" ? `\n\n---\nFootage: ${body.footageMessage}` : "";
+  }
+  return `\n\n---\n${footageSteps(clips, body.footageExpiresInSeconds, slug)}`;
+}
+
+const PRICING_URL = "https://nightmarquee.com/pricing?ref=mcp";
+
+export interface FootageResult {
+  slug: string;
+  footage?: FootageLink[];
+  footageExpiresInSeconds?: number;
+  /** Why there are no links, when the answer is about access rather than a failure. */
+  message?: string;
+  pricingUrl?: string;
+  error?: string;
+}
+
+/**
+ * Fresh links for one prompt's footage, without fetching the prompt again.
+ * The site decides who may have them; this only words its answer.
+ */
+export async function fetchFootage(
+  slug: string,
+  session: Session
+): Promise<{ text: string; structured: FootageResult }> {
+  const answer = (text: string, extra: Omit<FootageResult, "slug"> = {}) => ({
+    text,
+    structured: { slug, ...extra },
+  });
+
+  let body: { expiresInSeconds?: unknown; clips?: unknown };
+  try {
+    body = await apiGet(`/api/footage/${encodeURIComponent(slug)}`, session);
+  } catch (err) {
+    const status = err instanceof ApiError ? err.status : 0;
+    const access = (message: string, extra: Omit<FootageResult, "slug"> = {}) =>
+      answer(message, { message, ...extra });
+    if (status === 401) {
+      return access(
+        `"${slug}" has footage. Run nightmarquee_sign_in, then try again: a free account covers a free prompt's footage, the rest need Unlimited.`
+      );
+    }
+    if (status === 403) {
+      return access(`The footage of "${slug}" comes with Unlimited: ${PRICING_URL}`, { pricingUrl: PRICING_URL });
+    }
+    if (status === 404) {
+      return access(`No footage for "${slug}": the prompt does not exist or its demo plays none.`);
+    }
+    if (status === 429) {
+      return access("This account asked for too many footage packs this hour. Try again in an hour.");
+    }
+    const message = friendly(err, `fetching the footage of "${slug}"`);
+    return answer(message, { error: message });
+  }
+
+  const clips = safeClips(body.clips);
+  if (clips.length === 0) {
+    const message = `nightmarquee.com sent no usable footage links for "${slug}". Try again in a moment.`;
+    return answer(message, { error: message });
+  }
+  return answer(footageSteps(clips, body.expiresInSeconds, slug), {
+    footage: clips,
+    footageExpiresInSeconds: isCount(body.expiresInSeconds) ? body.expiresInSeconds : undefined,
+  });
+}
+
 export function formatPrompt(body: PromptBody, slug: string): string {
   if (body.entitled && body.text) {
     const footer = body.demoUrl ? `\n\n---\nLive demo: ${body.demoUrl}` : "";
-    return `${body.text}${footer}`;
+    return `${body.text}${formatFootage(body, slug)}${footer}`;
   }
 
   return [
@@ -113,7 +261,7 @@ export function formatPrompt(body: PromptBody, slug: string): string {
     "",
     `Locked — "${slug}" is an Unlimited prompt.`,
     body.upsell?.message ?? "Unlock every drop:",
-    body.upsell?.pricingUrl ?? "https://nightmarquee.com/pricing?ref=mcp",
+    body.upsell?.pricingUrl ?? PRICING_URL,
   ]
     .join("\n")
     .trim();
@@ -236,12 +384,12 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. Free prompts need no account; Unlimited prompts need one (run nightmarquee_sign_in).",
+        "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. When the account may download the demo's footage, the result also lists a short-lived link per clip: save each into public/ under its name before building. Free prompts need no account and their footage needs a free one; Unlimited prompts need Unlimited (run nightmarquee_sign_in).",
       inputSchema: z.object({
         // A free slug, deliberately: a model that reaches for the example as a
         // default should land on something it can actually fetch.
         slug: z.string().describe("Prompt slug, e.g. \"glasshouse-nine\" — from nightmarquee_search_prompts"),
-        tool: z.enum(TOOL_IDS).optional().describe("Target tool dialect, defaults to claude"),
+        tool: z.enum(TOOL_IDS).optional().describe(DIALECT_HELP),
         brand: z.string().max(24).optional().describe("Swap the fictional brand for this name"),
       }),
       outputSchema: z.object({
@@ -255,12 +403,21 @@ export function registerTools(server: McpServer, session: () => Session): void {
         text: z.string().optional().describe("The full build prompt, present only when entitled"),
         demoUrl: z.string().optional(),
         pricingUrl: z.string().optional().describe("Set when the prompt is locked"),
+        footage: FOOTAGE_LIST
+          .optional()
+          .describe("The demo's footage, present when the account may download it"),
+        footageExpiresInSeconds: z.number().optional().describe("How long the footage links work"),
+        footageMessage: z
+          .string()
+          .optional()
+          .describe("Why a demo with footage came without links, such as needing to sign in"),
         error: z.string().optional().describe("Set when the prompt could not be fetched"),
       }),
     },
     async ({ slug, tool, brand }) => {
       const params = new URLSearchParams();
-      if (tool) params.set("tool", tool);
+      const dialect = dialectFor(tool, session().client);
+      if (dialect) params.set("tool", dialect);
       if (brand) params.set("brand", brand);
       const query = params.toString() ? `?${params}` : "";
 
@@ -288,6 +445,41 @@ export function registerTools(server: McpServer, session: () => Session): void {
         }
         return missing(friendly(err, `fetching "${slug}"`));
       }
+    }
+  );
+
+  server.registerTool(
+    "nightmarquee_get_footage",
+    {
+      title: "Get a NightMarquee demo's footage",
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        // Every call signs new links and counts toward the hourly limit.
+        // Clients only read this when readOnlyHint is false; it is sent
+        // anyway because a partial set reads as unspecified.
+        idempotentHint: false,
+        openWorldHint: true,
+      },
+      description:
+        "Fresh download links for the footage a NightMarquee demo plays, every clip, without fetching the prompt again. Use it when the links from nightmarquee_get_prompt have expired. Save each file into public/ under its name before building. A free prompt's footage needs a free account and the rest need Unlimited (run nightmarquee_sign_in).",
+      inputSchema: z.object({
+        slug: z.string().describe("Prompt slug, as passed to nightmarquee_get_prompt"),
+      }),
+      outputSchema: z.object({
+        slug: z.string(),
+        footage: FOOTAGE_LIST
+          .optional()
+          .describe("Present when the account may download this demo's footage"),
+        footageExpiresInSeconds: z.number().optional().describe("How long the links work"),
+        message: z.string().optional().describe("Why there are no links: sign in, upgrade, none, or the hourly limit"),
+        pricingUrl: z.string().optional().describe("Set when the footage needs Unlimited"),
+        error: z.string().optional().describe("Set when the footage could not be fetched"),
+      }),
+    },
+    async ({ slug }) => {
+      const { text, structured } = await fetchFootage(slug, session());
+      return reply(text, structured);
     }
   );
 

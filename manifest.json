@@ -2,9 +2,9 @@
   "manifest_version": "0.2",
   "name": "nightmarquee",
   "display_name": "NightMarquee",
-  "version": "0.1.5",
-  "description": "Cinematic website prompts as slash commands, tuned for Lovable, Bolt, Cursor and Claude.",
-  "long_description": "Art-directed website and mobile app prompts for hero sections, landing pages, SaaS, portfolio, e-commerce, 3D/WebGL scenes and phone apps. Every prompt is registered as a real MCP prompt, so it appears in the command palette rather than waiting for the model to think of it, and each is written natively for the tool you are in. Every build has a live demo you can scroll before you spend a token. The free prompts work with no account; Unlimited unlocks the rest in-session via a short device code.",
+  "version": "0.1.6",
+  "description": "Cinematic website prompts plus demo footage, tuned for Lovable, Bolt, Cursor, Claude and Codex.",
+  "long_description": "Art-directed website and mobile app prompts for hero sections, landing pages, SaaS, portfolio, e-commerce, 3D/WebGL scenes and phone apps. Every prompt is registered as a real MCP prompt, so it appears in the command palette rather than waiting for the model to think of it, and each is written natively for the tool you are in. Every build has a live demo you can scroll before you spend a token. When the demo plays video and your account may download it, the prompt comes with every clip, and the agent places the files in public/ itself. The free prompts work with no account; Unlimited unlocks the rest in-session via a short device code.",
   "author": {
     "name": "NightMarquee",
     "url": "https://nightmarquee.com"
@@ -22,7 +22,8 @@
     "claude",
     "cursor",
     "lovable",
-    "bolt"
+    "bolt",
+    "codex"
   ],
   "repository": {
     "type": "git",
@@ -49,6 +50,10 @@
     {
       "name": "nightmarquee_get_prompt",
       "description": "Fetch one build spec, written for the tool you are in."
+    },
+    {
+      "name": "nightmarquee_get_footage",
+      "description": "Fresh download links for a demo's footage, every clip."
     },
     {
       "name": "nightmarquee_sign_in",
