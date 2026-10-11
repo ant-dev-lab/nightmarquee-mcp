@@ -106,6 +106,19 @@ site.
 In Lovable and Bolt, download the files from the prompt page on
 nightmarquee.com and upload them there.
 
+## Skills
+
+The same catalog also installs as agent skills, for editors that read
+`SKILL.md` files:
+
+```
+npx skills add ant-dev-lab/nightmarquee-mcp
+```
+
+That adds a `nightmarquee` guide and one skill per free prompt. They carry no
+prompt text: each fetches the current prompt, through this server when it is
+installed and from nightmarquee.com when it is not.
+
 ## Unlimited
 
 Some prompts are free, currently `glasshouse-nine`, `aetheris-voyage`,
