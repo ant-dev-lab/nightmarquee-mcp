@@ -16,11 +16,11 @@
  *
  * Requires `npx smithery auth login` first. Run after `npm run build:mcpb`.
  */
-import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { probeServer } from "./read-tools.mjs";
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const stage = join(pkgRoot, "build", "stage");
@@ -50,40 +50,17 @@ if (!apiKey) {
 }
 
 /** Drive the staged server over stdio and read back what it really exposes. */
-function probe() {
-  const msg = (id, method, params = {}) =>
-    JSON.stringify({ jsonrpc: "2.0", id, method, params });
-  const res = spawnSync(process.execPath, ["server/index.js"], {
-    cwd: stage,
-    encoding: "utf8",
-    timeout: 60_000,
-    input: [
-      msg(1, "initialize", {
-        protocolVersion: "2025-06-18",
-        capabilities: {},
-        clientInfo: { name: "publish-smithery", version: "1" },
-      }),
-      msg(2, "tools/list"),
-      msg(3, "prompts/list"),
-      "",
-    ].join("\n"),
-  });
-  const byId = {};
-  for (const line of res.stdout.split("\n")) {
-    const t = line.trim();
-    if (!t) continue;
-    try {
-      const f = JSON.parse(t);
-      if (f.id) byId[f.id] = f.result;
-    } catch {
-      /* not a JSON-RPC frame */
-    }
-  }
-  if (!byId[1] || !byId[2]?.tools?.length) {
-    console.error("Could not read the staged server.", res.stderr || "");
+async function probe() {
+  try {
+    const r = await probeServer(join(stage, "server", "index.js"), ["tools/list", "prompts/list"], {
+      cwd: stage,
+    });
+    if (!r.initialize || !r["tools/list"]?.tools?.length) throw new Error("no tools");
+    return { 1: r.initialize, 2: r["tools/list"], 3: r["prompts/list"] };
+  } catch (err) {
+    console.error("Could not read the staged server.", String(err));
     process.exit(1);
   }
-  return byId;
 }
 
 // ServerCard sub-objects set additionalProperties:false, so send only what the
@@ -91,7 +68,7 @@ function probe() {
 const pick = (o, keys) =>
   Object.fromEntries(keys.filter((k) => o?.[k] != null).map((k) => [k, o[k]]));
 
-const r = probe();
+const r = await probe();
 const payload = {
   type: "stdio",
   runtime: "node",
@@ -102,7 +79,7 @@ const payload = {
       title: "NightMarquee",
       websiteUrl: "https://nightmarquee.com",
       description:
-        "Art-directed website prompts delivered as slash commands in Claude Code, Claude Desktop and Cursor.",
+        "Art-directed website prompts, with the footage their demos play, as slash commands in Claude Code, Claude Desktop, Cursor and Codex.",
     },
     tools: r[2].tools.map((t) =>
       pick(t, [

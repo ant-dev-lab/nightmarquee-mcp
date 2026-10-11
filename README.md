@@ -16,6 +16,12 @@ An MCP (Model Context Protocol) stdio server. Node 20 or newer.
 claude mcp add nightmarquee -- npx -y nightmarquee
 ```
 
+Or as a Claude Code plugin, which adds the same server plus the skills below:
+
+```
+/plugin install nightmarquee --marketplace ant-dev-lab/nightmarquee-mcp
+```
+
 **Claude Desktop / Cursor**: add to your MCP config:
 
 ```json

@@ -13,10 +13,11 @@
  * https://.../releases/latest/download/nightmarquee.mcpb keeps working across
  * bumps. The version lives in the manifest and the release tag.
  */
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readTools } from "./read-tools.mjs";
 
 const pkgRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const build = join(pkgRoot, "build");
@@ -64,48 +65,16 @@ run("npm", ["install", "--omit=dev", "--no-audit", "--no-fund"], stage);
 /**
  * Take the declared tools from the server itself rather than from a hand-kept
  * list, so a renamed or added tool cannot leave the manifest describing
- * something that no longer exists.
- *
- * Only name and description are carried over: the MCPB manifest schema rejects
- * any other key on a tool, inputSchema included.
+ * something that no longer exists. Only name and description are carried
+ * over: the MCPB manifest schema rejects any other key on a tool.
  */
-function readToolsFromServer() {
-  const req = (id, method) =>
-    JSON.stringify({ jsonrpc: "2.0", id, method, params: id === 1 ? {
-      protocolVersion: "2025-06-18",
-      capabilities: {},
-      clientInfo: { name: "build-mcpb", version: pkg.version },
-    } : {} });
-
-  const res = spawnSync(process.execPath, ["server/index.js"], {
-    cwd: stage,
-    input: `${req(1, "initialize")}\n${req(2, "tools/list")}\n`,
-    encoding: "utf8",
-    timeout: 30_000,
-  });
-
-  const frames = res.stdout
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .flatMap((l) => {
-      try {
-        return [JSON.parse(l)];
-      } catch {
-        return [];
-      }
-    });
-
-  const tools = frames.find((f) => f.id === 2)?.result?.tools;
-  if (!tools?.length) {
-    console.error("Could not read tools/list from the staged server.");
-    console.error(res.stderr || "(no stderr)");
-    process.exit(1);
-  }
-  return tools.map(({ name, description }) => ({ name, description }));
+try {
+  manifest.tools = await readTools(join(stage, "server", "index.js"));
+} catch (err) {
+  console.error("Could not read tools/list from the staged server.");
+  console.error(String(err));
+  process.exit(1);
 }
-
-manifest.tools = readToolsFromServer();
 console.log(`Declared ${manifest.tools.length} tools from the live server.`);
 writeFileSync(join(stage, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 

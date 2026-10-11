@@ -1,0 +1,20 @@
+{
+  "name": "nightmarquee",
+  "owner": {
+    "name": "NightMarquee",
+    "email": "support@nightmarquee.com",
+    "url": "https://nightmarquee.com"
+  },
+  "metadata": {
+    "description": "Cinematic website prompts plus demo footage, tuned for Lovable, Bolt, Cursor, Claude and Codex."
+  },
+  "plugins": [
+    {
+      "name": "nightmarquee",
+      "source": "./",
+      "description": "Every NightMarquee prompt as a slash command, the footage each demo plays, and skills that walk the agent from prompt to build. Free prompts need no account.",
+      "homepage": "https://nightmarquee.com/mcp",
+      "license": "MIT"
+    }
+  ]
+}
