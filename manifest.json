@@ -11,7 +11,7 @@
   },
   "homepage": "https://nightmarquee.com",
   "documentation": "https://nightmarquee.com/mcp",
-  "support": "https://github.com/ant-dev-lab/nightmarquee-mcp/issues",
+  "support": "https://github.com/nightmarquee/nightmarquee-mcp/issues",
   "icon": "icon.png",
   "license": "MIT",
   "keywords": [
@@ -27,7 +27,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp"
+    "url": "https://github.com/nightmarquee/nightmarquee-mcp"
   },
   "server": {
     "type": "node",

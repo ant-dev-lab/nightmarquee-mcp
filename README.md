@@ -24,7 +24,7 @@ first time it needs it. The same steps, with buttons, are on
 - **ChatGPT**: turn on developer mode in settings, add a new connector, paste the address. Developer mode is not offered on every account.
 - **Cursor**: use the Add to Cursor button on <https://nightmarquee.com/mcp>, then confirm in Cursor.
 - **VS Code**: use the Add to VS Code button on <https://nightmarquee.com/mcp>, check the server details, then install.
-- **Claude Code**: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`
+- **Claude Code**: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`, or as a plugin, which adds the remote server plus the skills below: `/plugin install nightmarquee --marketplace nightmarquee/nightmarquee-mcp`
 - **Codex**: `codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp`
 - **Any other tool**: paste the address where it asks for a remote MCP server. It uses the streamable HTTP transport and signs you in with OAuth.
 
@@ -38,12 +38,6 @@ add a remote address.
 
 ```bash
 claude mcp add nightmarquee -- npx -y nightmarquee
-```
-
-Or as a Claude Code plugin, which adds the server plus the skills below:
-
-```
-/plugin install nightmarquee --marketplace ant-dev-lab/nightmarquee-mcp
 ```
 
 **Claude Desktop / Cursor**: add to your MCP config:
@@ -142,12 +136,13 @@ The same catalog also installs as agent skills, for editors that read
 `SKILL.md` files:
 
 ```
-npx skills add ant-dev-lab/nightmarquee-mcp
+npx skills add nightmarquee/nightmarquee-mcp
 ```
 
 That adds a `nightmarquee` guide and one skill per free prompt. They carry no
-prompt text: each fetches the current prompt, through this server when it is
-installed and from nightmarquee.com when it is not.
+prompt text: each fetches the current prompt through the remote server,
+`https://mcp.nightmarquee.com/mcp`, when it is connected, and otherwise asks
+you to copy it from the design's page on nightmarquee.com.
 
 ## Plans
 

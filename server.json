@@ -3,7 +3,7 @@
   "name": "io.github.ant-dev-lab/nightmarquee",
   "description": "Cinematic website prompts plus demo footage, tuned for Lovable, Bolt, Cursor, Claude and Codex.",
   "repository": {
-    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp",
+    "url": "https://github.com/nightmarquee/nightmarquee-mcp",
     "source": "github"
   },
   "version": "0.1.8",

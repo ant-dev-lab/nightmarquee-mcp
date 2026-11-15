@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Builds the skills that `npx skills add ant-dev-lab/nightmarquee-mcp`
+ * Builds the skills that `npx skills add nightmarquee/nightmarquee-mcp`
  * installs: one guide to the whole catalog, and one per free prompt. They are
  * written from the live catalog and carry no prompt text: each tells the agent
  * how to fetch the current prompt, so a copy on GitHub can never go stale or

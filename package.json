@@ -49,9 +49,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ant-dev-lab/nightmarquee-mcp.git"
+    "url": "git+https://github.com/nightmarquee/nightmarquee-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/ant-dev-lab/nightmarquee-mcp/issues"
+    "url": "https://github.com/nightmarquee/nightmarquee-mcp/issues"
   }
 }
