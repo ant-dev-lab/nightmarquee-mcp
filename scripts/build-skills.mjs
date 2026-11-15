@@ -14,6 +14,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SITE = "https://nightmarquee.com";
+const REMOTE = "https://mcp.nightmarquee.com/mcp";
 
 /** A YAML double-quoted scalar; JSON string escapes are valid YAML. */
 const q = (value) => JSON.stringify(value);
@@ -30,42 +31,48 @@ function guide(catalog) {
   const categories = [...new Set(catalog.prompts.map((p) => p.category))].join(", ");
   return skill(
     "nightmarquee",
-    `Build cinematic, art-directed websites from NightMarquee prompts: ${catalog.prompts.length} builds (${categories}), each with a live demo, plus the footage the demos play for signed-in accounts. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo.`,
+    `Build cinematic, art-directed websites and apps from NightMarquee designs: ${catalog.prompts.length} builds (${categories}), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo.`,
     `
 # NightMarquee
 
-NightMarquee is a catalog of website and mobile app build prompts. Every prompt has a live demo at ${SITE}/demo/<slug>, and most demos play footage, which comes with the prompt for signed-in accounts.
+NightMarquee is a library of cinematic website and app designs. Every design has a live demo at ${SITE}/demo/<slug> and a build prompt; many have a runnable Next.js starter, and the demos' clips and images come with an account.
 
 ## With the MCP server (preferred)
 
-Install it once:
+Add the remote server once:
 
-- Claude Code: \`claude mcp add nightmarquee -- npx -y nightmarquee\`
-- Codex: \`codex mcp add nightmarquee -- npx -y nightmarquee\`
-- Cursor or Claude Desktop: add \`{ "command": "npx", "args": ["-y", "nightmarquee"] }\` under \`mcpServers\`
+- Claude Code: \`claude mcp add --transport http nightmarquee ${REMOTE}\`
+- Codex: \`codex mcp add nightmarquee --url ${REMOTE}\`
+- Claude, ChatGPT, Cursor or VS Code: the steps and buttons on ${SITE}/mcp
+- A tool that cannot add a remote address: the older local server, \`npx -y nightmarquee\`. It has a different set of tools, so these steps do not apply to it.
 
 Then:
 
-1. \`nightmarquee_search_prompts\` with a query, category or \`tier: "free"\`. Show the person the demo links and let them pick.
-2. \`nightmarquee_get_prompt(slug, tool, brand)\`. Pass \`tool\` for the editor you are in and \`brand\` for their name.
-3. If the result has \`footage\`, download each clip into \`public/\` under its \`name\` before building, while the links work (ten minutes). Quote each link in the shell, since it contains \`&\`: \`curl -fL --create-dirs -o public/hero.mp4 "<url>"\`. If the links expired, \`nightmarquee_get_footage(slug)\` returns fresh ones.
-4. Build the page the prompt describes, then compare it with the demo.
+1. \`search_designs\` with a query, a category or \`tier: "free"\`. Show the person the demo links and let them pick.
+2. \`get_design(slug, tool, brand)\`. Pass \`tool\` for the editor you are in (lovable, bolt, cursor, claude or codex) and \`brand\` for their brand or site name, up to 24 characters.
+3. ${STARTER_STEP}
+4. ${FOOTAGE_STEP("<slug>")}
+5. Build the page the prompt describes, or adapt the starter, then compare it with the demo.
 
-A free prompt's footage needs a free account and the rest come with any plan: run \`nightmarquee_sign_in\` and the person approves a short code in the browser.
+Free designs need no account. Starters and footage need a connected account, and paid designs need a plan. A tool that needs an account says so, and your MCP client opens the sign-in; if it does not, connect NightMarquee from the client's MCP settings.
 
 ## Without the MCP server
 
-Free prompts are open:
-
-- Catalog: \`curl -s ${SITE}/api/mcp/catalog\`
-- One prompt: \`curl -s "${SITE}/api/mcp/prompt/<slug>?tool=claude"\`, then use the \`text\` field.
-
-The free ones today: ${free.map((p) => `\`${p.slug}\``).join(", ")}. Paid prompts and all footage need the MCP server and an account.
+Free designs are open on their pages: ask the person to open ${SITE}/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: ${free.map((p) => `\`${p.slug}\``).join(", ")}. A signed-in person can also download starters and footage on the design's page.
 `
   );
 }
 
+/** Step 3 of the guide, and the starter line of a design's skill. */
+const STARTER_STEP =
+  "In a shell, when the person wants to run a starter: `get_design`'s result has `starter.available`. If you cannot see it, call `get_starter` anyway; a `not_found` answer means there is none. `get_starter(slug)` returns a download link that lasts ten minutes. The zip unpacks to `<slug>-starter/`: run `npm install` and `npm run dev` inside it. Each account gets 5 starters a day, and asking again for the same one within ten minutes is not counted twice.";
+
+/** Footage: where the starter and the prompt read it, without the large masters. */
+const FOOTAGE_STEP = (slug) =>
+  `For the demo's clips and images: \`get_footage(slug)\`. The starter already plays the clips online, so download them only to work offline or to build from the prompt. Save each file into \`public/drops/${slug}/\` under its \`name\`, while the links work (ten minutes); a starter then uses them when started with \`NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev\`. Skip the files named \`*-original.mp4\`: they are the large original masters, needed only to re-encode. Quote each link in the shell, since it contains \`&\`: \`curl -fL --create-dirs -o public/drops/${slug}/hero.mp4 "<url>"\`.`;
+
 function freePrompt(p) {
+  const page = p.pageUrl ?? `${SITE}/p/${p.slug}`;
   return skill(
     `nightmarquee-${p.slug}`,
     `${p.title}: ${p.tagline}. ${p.description} Builds the NightMarquee "${p.title}" page; live demo at ${p.demoUrl}.`,
@@ -80,12 +87,15 @@ ${p.description}
 
 The prompt is kept current on nightmarquee.com, so fetch it rather than writing the page from this summary.
 
-- With the NightMarquee MCP server: \`nightmarquee_get_prompt(slug: "${p.slug}", tool: "claude")\`. Pass the \`tool\` for the editor you are in (lovable, bolt, cursor, claude or codex) and \`brand\` for the person's own name.
-- Without it: \`curl -s "${SITE}/api/mcp/prompt/${p.slug}?tool=claude"\` and use the \`text\` field.
+- With the NightMarquee MCP server (${REMOTE}): \`get_design(slug: "${p.slug}", tool: "claude")\`. Pass the \`tool\` for the editor you are in (lovable, bolt, cursor, claude or codex) and \`brand\` for the person's brand or site name, up to 24 characters.
+- Without it: ask the person to open ${page}, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it.
 
-## Footage
+## Starter and footage
 
-The demo's clips come with the prompt for anyone signed in to a free NightMarquee account, through the MCP server (\`nightmarquee_sign_in\`, then \`nightmarquee_get_footage(slug: "${p.slug}")\`). Download each clip into \`public/\` under its name before building. Without them, follow the prompt's own footage steps.
+These need a connected NightMarquee account.
+
+- Starter: \`get_starter(slug: "${p.slug}")\`. ${STARTER_STEP.replace("In a shell, when the person wants to run a starter: ", "").replaceAll("<slug>", p.slug).replace("`get_starter(slug)` returns", "It returns")}
+- Footage: \`get_footage(slug: "${p.slug}")\`. ${FOOTAGE_STEP(p.slug).replace("For the demo's clips and images: `get_footage(slug)`. ", "")}
 
 Build the page, then compare it with the demo. Prompt licence: ${SITE}/license
 `

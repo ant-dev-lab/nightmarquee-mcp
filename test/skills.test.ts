@@ -60,18 +60,47 @@ describe("buildSkills", () => {
 
   it("tells the agent how to fetch the current prompt, with or without the MCP server", () => {
     const md = byPath["skills/nightmarquee-glasshouse-nine/SKILL.md"];
-    expect(md).toContain('nightmarquee_get_prompt(slug: "glasshouse-nine"');
-    expect(md).toContain("https://nightmarquee.com/api/mcp/prompt/glasshouse-nine?tool=claude");
+    expect(md).toContain('get_design(slug: "glasshouse-nine"');
+    expect(md).toContain('get_starter(slug: "glasshouse-nine")');
+    expect(md).toContain('get_footage(slug: "glasshouse-nine")');
+    expect(md).toContain("https://nightmarquee.com/p/glasshouse-nine");
     expect(md).toContain("https://nightmarquee.com/demo/glasshouse-nine");
     expect(md).toContain("A greenhouse hero that breathes");
   });
 
-  it("explains the footage step in the guide", () => {
+  it("explains the remote server's steps in the guide, footage and starter included", () => {
     const md = byPath["skills/nightmarquee/SKILL.md"];
-    expect(md).toContain("nightmarquee_search_prompts");
-    expect(md).toContain("nightmarquee_get_footage");
+    expect(md).toContain("https://mcp.nightmarquee.com/mcp");
+    expect(md).toContain("claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp");
+    for (const tool of ["search_designs", "get_design", "get_starter", "get_footage"]) expect(md).toContain(tool);
     expect(md).toMatch(/public\//);
-    expect(md).toContain("npx -y nightmarquee");
+    expect(md).toContain("npx -y nightmarquee"); // the older way, for a tool that cannot add a remote address
+    expect(md).toContain("codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp");
+  });
+
+  it("puts footage where the starter and the prompt read it, skips the masters, and gives the starter's limits", () => {
+    const md = byPath["skills/nightmarquee-glasshouse-nine/SKILL.md"];
+    expect(md).toContain("public/drops/glasshouse-nine/");
+    expect(md).toContain("-original.mp4");
+    expect(md).toContain("NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev");
+    expect(md).toContain("starter.available");
+    expect(md).toContain("not_found");
+    expect(md).toContain("glasshouse-nine-starter/");
+    expect(md).toMatch(/5 starters a day/);
+    expect(byPath["skills/nightmarquee/SKILL.md"]).toContain("public/drops/<slug>/");
+  });
+
+  it("says a paid design needs a plan, and a brand is a site name of up to 24 characters", () => {
+    const guide = byPath["skills/nightmarquee/SKILL.md"];
+    expect(guide).toMatch(/paid designs need a plan/i);
+    expect(guide).toContain("up to 24 characters");
+  });
+
+  it("names no tool of the old package and no route it calls, which are retired after the remote server", () => {
+    for (const { content } of skills) {
+      expect(content).not.toMatch(/nightmarquee_[a-z]+/);
+      expect(content).not.toContain("/api/mcp/");
+    }
   });
 
   it("carries no prompt body and no long dashes", () => {

@@ -1,11 +1,8 @@
 {
   "mcpServers": {
     "nightmarquee": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "nightmarquee"
-      ]
+      "type": "http",
+      "url": "https://mcp.nightmarquee.com/mcp"
     }
   }
 }

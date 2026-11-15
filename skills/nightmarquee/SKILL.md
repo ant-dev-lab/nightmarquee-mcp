@@ -1,34 +1,31 @@
 ---
 name: "nightmarquee"
-description: "Build cinematic, art-directed websites from NightMarquee prompts: 45 builds (landing, hero, ecommerce, portfolio, saas, 3d, mobile), each with a live demo, plus the footage the demos play for signed-in accounts. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
+description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 84 builds (landing, portfolio, ecommerce, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
 ---
 
 # NightMarquee
 
-NightMarquee is a catalog of website and mobile app build prompts. Every prompt has a live demo at https://nightmarquee.com/demo/<slug>, and most demos play footage, which comes with the prompt for signed-in accounts.
+NightMarquee is a library of cinematic website and app designs. Every design has a live demo at https://nightmarquee.com/demo/<slug> and a build prompt; many have a runnable Next.js starter, and the demos' clips and images come with an account.
 
 ## With the MCP server (preferred)
 
-Install it once:
+Add the remote server once:
 
-- Claude Code: `claude mcp add nightmarquee -- npx -y nightmarquee`
-- Codex: `codex mcp add nightmarquee -- npx -y nightmarquee`
-- Cursor or Claude Desktop: add `{ "command": "npx", "args": ["-y", "nightmarquee"] }` under `mcpServers`
+- Claude Code: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`
+- Codex: `codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp`
+- Claude, ChatGPT, Cursor or VS Code: the steps and buttons on https://nightmarquee.com/mcp
+- A tool that cannot add a remote address: the older local server, `npx -y nightmarquee`. It has a different set of tools, so these steps do not apply to it.
 
 Then:
 
-1. `nightmarquee_search_prompts` with a query, category or `tier: "free"`. Show the person the demo links and let them pick.
-2. `nightmarquee_get_prompt(slug, tool, brand)`. Pass `tool` for the editor you are in and `brand` for their name.
-3. If the result has `footage`, download each clip into `public/` under its `name` before building, while the links work (ten minutes). Quote each link in the shell, since it contains `&`: `curl -fL --create-dirs -o public/hero.mp4 "<url>"`. If the links expired, `nightmarquee_get_footage(slug)` returns fresh ones.
-4. Build the page the prompt describes, then compare it with the demo.
+1. `search_designs` with a query, a category or `tier: "free"`. Show the person the demo links and let them pick.
+2. `get_design(slug, tool, brand)`. Pass `tool` for the editor you are in (lovable, bolt, cursor, claude or codex) and `brand` for their brand or site name, up to 24 characters.
+3. In a shell, when the person wants to run a starter: `get_design`'s result has `starter.available`. If you cannot see it, call `get_starter` anyway; a `not_found` answer means there is none. `get_starter(slug)` returns a download link that lasts ten minutes. The zip unpacks to `<slug>-starter/`: run `npm install` and `npm run dev` inside it. Each account gets 5 starters a day, and asking again for the same one within ten minutes is not counted twice.
+4. For the demo's clips and images: `get_footage(slug)`. The starter already plays the clips online, so download them only to work offline or to build from the prompt. Save each file into `public/drops/<slug>/` under its `name`, while the links work (ten minutes); a starter then uses them when started with `NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev`. Skip the files named `*-original.mp4`: they are the large original masters, needed only to re-encode. Quote each link in the shell, since it contains `&`: `curl -fL --create-dirs -o public/drops/<slug>/hero.mp4 "<url>"`.
+5. Build the page the prompt describes, or adapt the starter, then compare it with the demo.
 
-A free prompt's footage needs a free account and the rest come with any plan: run `nightmarquee_sign_in` and the person approves a short code in the browser.
+Free designs need no account. Starters and footage need a connected account, and paid designs need a plan. A tool that needs an account says so, and your MCP client opens the sign-in; if it does not, connect NightMarquee from the client's MCP settings.
 
 ## Without the MCP server
 
-Free prompts are open:
-
-- Catalog: `curl -s https://nightmarquee.com/api/mcp/catalog`
-- One prompt: `curl -s "https://nightmarquee.com/api/mcp/prompt/<slug>?tool=claude"`, then use the `text` field.
-
-The free ones today: `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. Paid prompts and all footage need the MCP server and an account.
+Free designs are open on their pages: ask the person to open https://nightmarquee.com/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: `ninety-seconds`, `side-eye`, `echo-cave`, `jacquard-hall`, `snail-courier`, `lathe-lacquer`, `leaf-assay`, `ternary-systems`, `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. A signed-in person can also download starters and footage on the design's page.

@@ -12,7 +12,7 @@
     {
       "name": "nightmarquee",
       "source": "./",
-      "description": "Every NightMarquee prompt as a slash command, the footage each demo plays, and skills that walk the agent from prompt to build. Free prompts need no account.",
+      "description": "The NightMarquee remote server and skills that walk the agent from a design to a build: search designs, get build prompts, starters and the demos' footage. Free designs need no account.",
       "homepage": "https://nightmarquee.com/mcp",
       "license": "MIT"
     }
