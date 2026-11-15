@@ -1,14 +1,38 @@
 # nightmarquee
 
-Cinematic website prompts with live previews, inside your editor.
+Cinematic website prompts with live demos, inside your editor.
 
 Art-directed prompts for hero sections, landing pages, SaaS, portfolio,
 e-commerce and 3D/WebGL scenes. Each is tuned for Lovable, Bolt, Cursor,
 Claude and Codex, and each has a live demo you can scroll.
 
-An MCP (Model Context Protocol) stdio server. Node 20 or newer.
+NightMarquee is a remote MCP (Model Context Protocol) server. Add one address
+to your AI tool, and search designs, get build prompts and starters, and check
+a site from there:
+
+```
+https://mcp.nightmarquee.com/mcp
+```
+
+Some designs and tools ask you to sign in. Your tool opens the sign-in the
+first time it needs it. The same steps, with buttons, are on
+<https://nightmarquee.com/mcp>.
 
 ## Install
+
+- **Claude**: Settings, then Connectors, add a custom connector, paste the address.
+- **ChatGPT**: turn on developer mode in settings, add a new connector, paste the address. Developer mode is not offered on every account.
+- **Cursor**: use the Add to Cursor button on <https://nightmarquee.com/mcp>, then confirm in Cursor.
+- **VS Code**: use the Add to VS Code button on <https://nightmarquee.com/mcp>, check the server details, then install.
+- **Claude Code**: `claude mcp add --transport http nightmarquee https://mcp.nightmarquee.com/mcp`
+- **Codex**: `codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp`
+- **Any other tool**: paste the address where it asks for a remote MCP server. It uses the streamable HTTP transport and signs you in with OAuth.
+
+## The older way: this npm package
+
+This package is the earlier way: a local stdio server (Node 20 or newer) with
+the tools listed under Use below. It still works. Pick it if your tool cannot
+add a remote address.
 
 **Claude Code**
 
@@ -16,7 +40,7 @@ An MCP (Model Context Protocol) stdio server. Node 20 or newer.
 claude mcp add nightmarquee -- npx -y nightmarquee
 ```
 
-Or as a Claude Code plugin, which adds the same server plus the skills below:
+Or as a Claude Code plugin, which adds the server plus the skills below:
 
 ```
 /plugin install nightmarquee --marketplace ant-dev-lab/nightmarquee-mcp
@@ -68,10 +92,10 @@ No account needed. Free prompts work immediately.
   `codex`). Without one you get `codex` in Codex and `claude` elsewhere
 - `nightmarquee_get_footage`: fresh download links for a demo's footage, when
   the ones from `nightmarquee_get_prompt` have expired
-- `nightmarquee_sign_in`: connect an account to unlock Unlimited prompts
+- `nightmarquee_sign_in`: connect an account, so the prompts that come with a plan open
 - `nightmarquee_whoami`: check what's connected
 
-Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce`, `3d` and `mobile`.
+Categories are `hero`, `landing`, `saas`, `portfolio`, `ecommerce`, `3d`, `mobile` and `dashboard`.
 
 Ask for a design in plain language and the model will usually reach for
 `nightmarquee_search_prompts` on its own. Or drive it directly:
@@ -103,8 +127,8 @@ into `public/` under their names and then builds, so the page you get plays the
 same footage as the demo. The links last 10 minutes; `nightmarquee_get_footage`
 fetches fresh ones without the prompt.
 
-A free prompt's footage needs a free account, and the rest come with
-Unlimited. Without an account, the prompt text still arrives in full, with one
+A free prompt's footage needs a free account, and the rest come with any
+plan. Without an account, the prompt text still arrives in full, with one
 line saying how many clips the demo plays and that `nightmarquee_sign_in` gets
 them. Each account can fetch 30 packs an hour, shared with downloads on the
 site.
@@ -125,12 +149,12 @@ That adds a `nightmarquee` guide and one skill per free prompt. They carry no
 prompt text: each fetches the current prompt, through this server when it is
 installed and from nightmarquee.com when it is not.
 
-## Unlimited
+## Plans
 
 Some prompts are free, currently `glasshouse-nine`, `aetheris-voyage`,
 `nordlys-fintech`, `solstice-festival`, `lumen-observatory`, `sumi-atelier`,
-`wren` and `fieldnote`. The rest need
-[Unlimited](https://nightmarquee.com/pricing?ref=mcp). Run
+`wren` and `fieldnote`. The rest come with
+[any plan](https://nightmarquee.com/pricing?ref=mcp). Run
 `nightmarquee_search_prompts` with `tier: "free"` for the live list.
 
 Run `nightmarquee_sign_in` and approve the code in your browser. It waits about
@@ -159,6 +183,18 @@ and can be revoked from there; the next call falls back to free-only.
 | `NIGHTMARQUEE_HOME` | Directory for `credentials.json`. Defaults to `~/.nightmarquee`. |
 | `NIGHTMARQUEE_TIMEOUT_MS` | Ceiling on every API request, in milliseconds. Defaults to `10000`; unparseable or non-positive values fall back to the default, and anything above `2147483647` is clamped to it. |
 | `NIGHTMARQUEE_NO_TELEMETRY` | Set to `1` (any non-empty value works) to stop sending the install ID and your client's name. See below for exactly what this does and doesn't cover. |
+
+## Network calls
+
+The remote server runs on our side and this package is not involved. When you
+run the package, it makes HTTPS requests to `nightmarquee.com` (or the address
+in `NIGHTMARQUEE_API`), and to no other host:
+
+- `https://nightmarquee.com/api/mcp/*`: the catalog, the prompt text and the
+  sign-in.
+- `https://nightmarquee.com/api/footage/<slug>`: the footage links for a demo.
+
+Each request carries the headers listed under Privacy Policy.
 
 ## Privacy Policy
 
@@ -220,7 +256,7 @@ on request along with your account.
 
 Tokens and local credentials are under your control at any time: revoke a
 connected editor from your [account page](https://nightmarquee.com/account),
-which deletes the token outright, or delete `~/.nightmarquee/credentials.json`
+which stops the token working at once (the record is kept, marked revoked), or delete `~/.nightmarquee/credentials.json`
 to remove the local copy.
 
 ### Contact
@@ -233,7 +269,7 @@ Privacy questions, data access, and deletion requests:
 The server code in this package is MIT.
 
 The prompt text it fetches is licensed separately: free prompts cover personal
-and non-commercial projects, Unlimited adds commercial use, and the prompt text
+and non-commercial projects, a plan adds commercial use, and the prompt text
 itself may not be republished or resold. Full terms:
 <https://nightmarquee.com/license>.
 

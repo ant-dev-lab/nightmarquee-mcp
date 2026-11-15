@@ -26,7 +26,8 @@ describe("formatSearch", () => {
     expect(out).toContain("isola");
     expect(out).toContain("verdant-saas");
     expect(out).toContain("https://n.test/demo/isola");
-    expect(out).toMatch(/unlimited/i);
+    expect(out).toContain("with a plan");
+    expect(out).not.toMatch(/unlimited/i);
   });
 
   it("filters by category, tier and free-text query", () => {
@@ -61,7 +62,7 @@ describe("formatPrompt", () => {
     const out = formatPrompt(
       { entitled: false, tier: "unlimited", signedIn: false, teaser: "A fragrance hero.",
         upsell: { pricingUrl: "https://n.test/pricing?ref=mcp",
-                  message: "This is an Unlimited prompt. Run nightmarquee_sign_in to connect an account, or unlock every drop:" } },
+                  message: "This prompt comes with any plan. Run nightmarquee_sign_in to connect an account, or see plans:" } },
       "isola"
     );
     expect(out).toContain("A fragrance hero.");

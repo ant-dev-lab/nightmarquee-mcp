@@ -32,7 +32,7 @@ export async function registerCatalogPrompts(
       registerOne(server, session, prompt);
     } catch (err) {
       console.error(
-        `nightmarquee: skipped prompt "${prompt.slug}" — ${String(err)}`
+        `nightmarquee: skipped prompt "${prompt.slug}": ${String(err)}`
       );
     }
   }
@@ -46,11 +46,11 @@ function registerOne(
   server.registerPrompt(
     prompt.slug,
     {
-      title: `${prompt.title} — ${prompt.tagline}`,
+      title: `${prompt.title}: ${prompt.tagline}`,
       description:
         prompt.tier === "free"
           ? prompt.description
-          : `${prompt.description} (Unlimited)`,
+          : `${prompt.description} (with a plan)`,
       argsSchema: z.object({
         brand: z
           .string()

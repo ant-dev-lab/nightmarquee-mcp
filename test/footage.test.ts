@@ -64,13 +64,14 @@ describe("fetchFootage", () => {
     vi.stubGlobal("fetch", respond(401, { error: "sign_in" }));
     const { text, structured } = await fetchFootage("isola", session);
     expect(text).toContain("nightmarquee_sign_in");
-    // On an Unlimited prompt a free account would only reach a 403, so say so up front.
-    expect(text).toMatch(/Unlimited/);
+    // On a prompt that comes with a plan a free account would only reach a 403, so say so up front.
+    expect(text).toMatch(/any plan/);
+    expect(text).not.toMatch(/unlimited/i);
     expect(structured.footage).toBeUndefined();
     expect(structured.message).toBe(text);
   });
 
-  it("points at pricing when the account is not Unlimited", async () => {
+  it("points at the plans when the account has no plan", async () => {
     vi.stubGlobal("fetch", respond(403, { error: "upgrade" }));
     const { text, structured } = await fetchFootage("isola", session);
     expect(text).toContain("https://nightmarquee.com/pricing?ref=mcp");

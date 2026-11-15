@@ -141,7 +141,7 @@ export async function signIn(
           `Open ${uri}?code=${code} and approve the connection.`,
           `Your code is ${code}.`,
           "",
-          "Once you've approved it, run nightmarquee_sign_in again to finish — it picks up the same request.",
+          "Once you've approved it, run nightmarquee_sign_in again to finish. It picks up the same request.",
         ].join("\n")
       : "Still waiting for approval. Run nightmarquee_sign_in again once you've approved it in the browser.",
   };

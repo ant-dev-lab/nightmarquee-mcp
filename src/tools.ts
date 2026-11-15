@@ -13,7 +13,7 @@ import { activeToken } from "./creds.js";
 import { signIn } from "./device.js";
 import { DIALECT_HELP, TOOL_IDS, dialectFor } from "./dialects.js";
 
-const CATEGORIES = ["hero", "landing", "saas", "portfolio", "ecommerce", "3d", "mobile"] as const;
+const CATEGORIES = ["hero", "landing", "saas", "portfolio", "ecommerce", "3d", "mobile", "dashboard"] as const;
 
 /** One clip with its signed link, as get_prompt and get_footage both return it. */
 const FOOTAGE_LIST = z.array(
@@ -146,15 +146,15 @@ export function formatSearch(catalog: Catalog, args: SearchArgs): string {
 
   const lines = shown.map((p) =>
     [
-      `${p.slug} — ${p.title}`,
+      `${p.slug}: ${p.title}`,
       `  ${p.tagline}`,
-      `  ${p.tier === "free" ? "free" : "unlimited"} · ${p.category} · demo: ${p.demoUrl}`,
+      `  ${p.tier === "free" ? "free" : "with a plan"} · ${p.category} · demo: ${p.demoUrl}`,
     ].join("\n")
   );
 
   const withheld = matches.length - shown.length;
   if (withheld > 0) {
-    lines.push(`\n(${withheld} more not shown — raise \`limit\` or narrow the query.)`);
+    lines.push(`\n(${withheld} more not shown. Raise \`limit\` or narrow the query.)`);
   }
 
   return `${lines.join("\n\n")}\n\nFetch one with nightmarquee_get_prompt(slug).`;
@@ -223,11 +223,11 @@ export async function fetchFootage(
       answer(message, { message, ...extra });
     if (status === 401) {
       return access(
-        `"${slug}" has footage. Run nightmarquee_sign_in, then try again: a free account covers a free prompt's footage, the rest need Unlimited.`
+        `"${slug}" has footage. Run nightmarquee_sign_in, then try again: a free account covers a free prompt's footage, the rest come with any plan.`
       );
     }
     if (status === 403) {
-      return access(`The footage of "${slug}" comes with Unlimited: ${PRICING_URL}`, { pricingUrl: PRICING_URL });
+      return access(`The footage of "${slug}" comes with any plan: ${PRICING_URL}`, { pricingUrl: PRICING_URL });
     }
     if (status === 404) {
       return access(`No footage for "${slug}": the prompt does not exist or its demo plays none.`);
@@ -259,8 +259,8 @@ export function formatPrompt(body: PromptBody, slug: string): string {
   return [
     body.teaser ?? "",
     "",
-    `Locked — "${slug}" is an Unlimited prompt.`,
-    body.upsell?.message ?? "Unlock every drop:",
+    `Locked: "${slug}" comes with any plan.`,
+    body.upsell?.message ?? "See plans:",
     body.upsell?.pricingUrl ?? PRICING_URL,
   ]
     .join("\n")
@@ -326,7 +326,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Search the NightMarquee catalog of website and mobile app build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d, mobile) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
+        "Search the NightMarquee catalog of website and mobile app build prompts by keyword, category (hero, landing, saas, portfolio, ecommerce, 3d, mobile, dashboard) or tier. Returns matching slugs, taglines and demo links to pass to nightmarquee_get_prompt.",
       inputSchema: z.object({
         query: z.string().optional().describe("Free text, matched against titles, taglines and style keywords"),
         category: z
@@ -336,7 +336,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         tier: z
           .enum(["free", "unlimited"])
           .optional()
-          .describe("\"free\" needs no account; \"unlimited\" needs a signed-in Unlimited plan"),
+          .describe("\"free\" needs no account; \"unlimited\" (the id for the rest) comes with any plan, signed in"),
         limit: z
           .number()
           .int()
@@ -384,11 +384,11 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. When the account may download the demo's footage, the result also lists a short-lived link per clip: save each into public/ under its name before building. Free prompts need no account and their footage needs a free one; Unlimited prompts need Unlimited (run nightmarquee_sign_in).",
+        "Fetch the full build prompt for one NightMarquee design, tuned for the target tool. When the account may download the demo's footage, the result also lists a short-lived link per clip: save each into public/ under its name before building. Free prompts need no account and their footage needs a free one; the rest come with any plan (run nightmarquee_sign_in).",
       inputSchema: z.object({
         // A free slug, deliberately: a model that reaches for the example as a
         // default should land on something it can actually fetch.
-        slug: z.string().describe("Prompt slug, e.g. \"glasshouse-nine\" — from nightmarquee_search_prompts"),
+        slug: z.string().describe("Prompt slug, e.g. \"glasshouse-nine\", from nightmarquee_search_prompts"),
         tool: z.enum(TOOL_IDS).optional().describe(DIALECT_HELP),
         brand: z.string().max(24).optional().describe("Swap the fictional brand for this name"),
       }),
@@ -462,7 +462,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Fresh download links for the footage a NightMarquee demo plays, every clip, without fetching the prompt again. Use it when the links from nightmarquee_get_prompt have expired. Save each file into public/ under its name before building. A free prompt's footage needs a free account and the rest need Unlimited (run nightmarquee_sign_in).",
+        "Fresh download links for the footage a NightMarquee demo plays, every clip, without fetching the prompt again. Use it when the links from nightmarquee_get_prompt have expired. Save each file into public/ under its name before building. A free prompt's footage needs a free account and the rest come with any plan (run nightmarquee_sign_in).",
       inputSchema: z.object({
         slug: z.string().describe("Prompt slug, as passed to nightmarquee_get_prompt"),
       }),
@@ -473,7 +473,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
           .describe("Present when the account may download this demo's footage"),
         footageExpiresInSeconds: z.number().optional().describe("How long the links work"),
         message: z.string().optional().describe("Why there are no links: sign in, upgrade, none, or the hourly limit"),
-        pricingUrl: z.string().optional().describe("Set when the footage needs Unlimited"),
+        pricingUrl: z.string().optional().describe("Set when the footage comes with a plan"),
         error: z.string().optional().describe("Set when the footage could not be fetched"),
       }),
     },
@@ -497,7 +497,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         openWorldHint: true,
       },
       description:
-        "Connect a NightMarquee account so Unlimited prompts work here. Shows a short code to approve in the browser. Run it again after approving to finish.",
+        "Connect a NightMarquee account so the prompts that come with a plan work here. Shows a short code to approve in the browser. Run it again after approving to finish.",
       outputSchema: z.object({
         status: z
           .enum(["approved", "waiting", "expired", "unavailable"])
@@ -529,7 +529,7 @@ export function registerTools(server: McpServer, session: () => Session): void {
         signedIn: z.boolean(),
         email: z.string().nullable().optional(),
         free: z.number().int().optional().describe("Prompts readable without an account"),
-        unlimited: z.number().int().optional().describe("Prompts that need Unlimited"),
+        unlimited: z.number().int().optional().describe("Prompts that come with a plan"),
         message: z.string(),
         error: z.string().optional(),
       }),
@@ -547,8 +547,8 @@ export function registerTools(server: McpServer, session: () => Session): void {
         const paid = catalog.prompts.length - free;
         const message = [
           current.creds.email ? `Signed in as ${current.creds.email}.` : "Signed in.",
-          `Catalog: ${free} free, ${paid} Unlimited.`,
-          "Fetch any of them with nightmarquee_get_prompt — locked ones will say so.",
+          `Catalog: ${free} free, ${paid} with a plan.`,
+          "Fetch any of them with nightmarquee_get_prompt. Locked ones say so.",
         ].join("\n");
         return reply(message, {
           signedIn: true,

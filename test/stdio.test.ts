@@ -147,7 +147,7 @@ describe("the built binary over stdio", () => {
   it("is built before this test runs", () => {
     expect(
       existsSync(binary),
-      "dist/index.js missing — run `npm run build -w nightmarquee` first"
+      "dist/index.js missing: run `npm run build -w nightmarquee` first"
     ).toBe(true);
   });
 

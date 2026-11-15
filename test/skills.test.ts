@@ -76,7 +76,7 @@ describe("buildSkills", () => {
 
   it("carries no prompt body and no long dashes", () => {
     for (const { content } of skills) {
-      expect(content).not.toMatch(/[–—]/);
+      expect(content).not.toMatch(/[\u2013\u2014]/);
       expect(content.length).toBeLessThan(6000);
     }
   });

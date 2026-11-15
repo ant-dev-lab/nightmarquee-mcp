@@ -22,7 +22,7 @@ Then:
 3. If the result has `footage`, download each clip into `public/` under its `name` before building, while the links work (ten minutes). Quote each link in the shell, since it contains `&`: `curl -fL --create-dirs -o public/hero.mp4 "<url>"`. If the links expired, `nightmarquee_get_footage(slug)` returns fresh ones.
 4. Build the page the prompt describes, then compare it with the demo.
 
-A free prompt's footage needs a free account and the rest need Unlimited: run `nightmarquee_sign_in` and the person approves a short code in the browser.
+A free prompt's footage needs a free account and the rest come with any plan: run `nightmarquee_sign_in` and the person approves a short code in the browser.
 
 ## Without the MCP server
 

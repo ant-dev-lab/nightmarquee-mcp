@@ -81,7 +81,7 @@ describe("registerCatalogPrompts", () => {
     expect(registered).toEqual([]);
   });
 
-  it("lists locked prompts, marked Unlimited", async () => {
+  it("lists locked prompts, marked as coming with a plan", async () => {
     fetchMock.mockResolvedValue(
       json({ version: 1, tools: [], categories: [], prompts: [entry()] })
     );
@@ -92,9 +92,9 @@ describe("registerCatalogPrompts", () => {
     expect(registered).toHaveLength(1);
     expect(registered[0].name).toBe("isola");
     expect(registered[0].config.title).toBe(
-      "Isola — Composed for the hour the light turns amber"
+      "Isola: Composed for the hour the light turns amber"
     );
-    expect(registered[0].config.description).toBe("A fragrance hero. (Unlimited)");
+    expect(registered[0].config.description).toBe("A fragrance hero. (with a plan)");
   });
 
   it("leaves a free prompt's description alone", async () => {
@@ -157,7 +157,7 @@ describe("registerCatalogPrompts", () => {
     const result = await registered[0].cb({});
     const text = result.messages[0].content.text;
     expect(text).toContain("The first four lines.");
-    expect(text).toContain('Locked — "isola" is an Unlimited prompt.');
+    expect(text).toContain('Locked: "isola" comes with any plan.');
     expect(text).toContain("https://nightmarquee.com/pricing?ref=mcp");
   });
 

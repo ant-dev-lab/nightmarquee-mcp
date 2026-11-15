@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /**
- * Builds the MCPB bundle: the one-click install artifact for Claude Desktop,
- * and the only format Smithery accepts for a local stdio server.
+ * Builds the MCPB bundle: the one-click install artifact for Claude Desktop.
  *
  * The bundle has to be self-contained, which the workspace is not: npm hoists
  * @modelcontextprotocol/server and zod to the repo root, so a bundle that just
