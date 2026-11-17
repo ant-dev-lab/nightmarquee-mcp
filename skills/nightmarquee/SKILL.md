@@ -1,6 +1,6 @@
 ---
 name: "nightmarquee"
-description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 84 builds (landing, portfolio, ecommerce, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
+description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 85 builds (ecommerce, landing, portfolio, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
 ---
 
 # NightMarquee
@@ -23,6 +23,16 @@ Then:
 3. In a shell, when the person wants to run a starter: `get_design`'s result has `starter.available`. If you cannot see it, call `get_starter` anyway; a `not_found` answer means there is none. `get_starter(slug)` returns a download link that lasts ten minutes. The zip unpacks to `<slug>-starter/`: run `npm install` and `npm run dev` inside it. Each account gets 5 starters a day, and asking again for the same one within ten minutes is not counted twice.
 4. For the demo's clips and images: `get_footage(slug)`. The starter already plays the clips online, so download them only to work offline or to build from the prompt. Save each file into `public/drops/<slug>/` under its `name`, while the links work (ten minutes); a starter then uses them when started with `NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev`. Skip the files named `*-original.mp4`: they are the large original masters, needed only to re-encode. Quote each link in the shell, since it contains `&`: `curl -fL --create-dirs -o public/drops/<slug>/hero.mp4 "<url>"`.
 5. Build the page the prompt describes, or adapt the starter, then compare it with the demo.
+
+## What next
+
+Each of these is its own skill:
+
+- `nightmarquee-build`: from what the person wants to a chosen design and its prompt.
+- `nightmarquee-run-locally`: download a starter and run it on this computer.
+- `nightmarquee-make-it-mine`: their own name, words, colours, fonts and clips in a starter.
+- `nightmarquee-put-online`: a private git repo, Vercel, or both.
+- `nightmarquee-ai-look-test`: check a site for the AI look and fix what the check finds.
 
 Free designs need no account. Starters and footage need a connected account, and paid designs need a plan. A tool that needs an account says so, and your MCP client opens the sign-in; if it does not, connect NightMarquee from the client's MCP settings.
 

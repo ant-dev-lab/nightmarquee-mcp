@@ -1,0 +1,10 @@
+{
+  "slug": "wren",
+  "source": "wren-starter.zip from get_starter, 2026-11-17; the two snippets carry no licence stamp",
+  "gitignore": "public/drops/wren/*",
+  "gitignoreKeep": "!public/drops/wren/.gitkeep",
+  "rewrite": {
+    "source": "/drops/:path*",
+    "destination": "https://media.nightmarquee.com/drops/:path*"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "nightmarquee",
+  "version": "0.1.8",
+  "description": "Cinematic website designs with build prompts and starters, plus a check for AI-look problems. Add one address to Claude, ChatGPT, Cursor, VS Code, Claude Code or Codex. Search designs, read build prompts, get starter projects and check a site. Some designs and tools ask you to sign in. Your tool opens the sign-in the first time it needs it.",
+  "author": {
+    "name": "NightMarquee",
+    "email": "support@nightmarquee.com",
+    "url": "https://nightmarquee.com"
+  },
+  "homepage": "https://nightmarquee.com/mcp",
+  "repository": "https://github.com/nightmarquee/nightmarquee-mcp",
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "design",
+    "website",
+    "prompts",
+    "frontend",
+    "landing-page",
+    "animation"
+  ],
+  "logo": "./icon.png",
+  "mcpServers": "./.cursor-plugin/mcp.json"
+}

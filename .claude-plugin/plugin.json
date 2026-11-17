@@ -2,7 +2,7 @@
   "name": "nightmarquee",
   "displayName": "NightMarquee",
   "version": "0.1.8",
-  "description": "Cinematic website prompts plus demo footage, tuned for Lovable, Bolt, Cursor, Claude and Codex. Free prompts need no account.",
+  "description": "Cinematic website designs with build prompts and starters, plus a check for AI-look problems. Add one address to Claude, ChatGPT, Cursor, VS Code, Claude Code or Codex. Search designs, read build prompts, get starter projects and check a site. Some designs and tools ask you to sign in. Your tool opens the sign-in the first time it needs it.",
   "author": {
     "name": "NightMarquee",
     "email": "support@nightmarquee.com",
@@ -12,11 +12,17 @@
   "repository": "https://github.com/nightmarquee/nightmarquee-mcp",
   "license": "MIT",
   "keywords": [
+    "mcp",
     "design",
     "website",
     "prompts",
     "frontend",
     "landing-page",
     "animation"
-  ]
+  ],
+  "icon": "./icon.png",
+  "documentationUrl": "https://nightmarquee.com/mcp",
+  "supportUrl": "https://github.com/nightmarquee/nightmarquee-mcp/issues",
+  "privacyPolicyUrl": "https://nightmarquee.com/privacy",
+  "termsOfServiceUrl": "https://nightmarquee.com/terms"
 }

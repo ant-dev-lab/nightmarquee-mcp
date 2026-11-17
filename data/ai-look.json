@@ -1,0 +1,451 @@
+{
+  "detectorVersion": "0.1.22",
+  "viewports": [
+    "1280x800",
+    "390x844"
+  ],
+  "platforms": [
+    {
+      "node": "darwin-arm64",
+      "pkg": "darwin-arm64"
+    },
+    {
+      "node": "darwin-x64",
+      "pkg": "darwin-x64"
+    },
+    {
+      "node": "linux-arm64",
+      "pkg": "linux-arm64"
+    },
+    {
+      "node": "linux-x64",
+      "pkg": "linux-x64"
+    },
+    {
+      "node": "win32-x64",
+      "pkg": "windows-x64"
+    }
+  ],
+  "rules": [
+    {
+      "id": "ai-color-palette",
+      "name": "AI color palette",
+      "category": "slop",
+      "goal": "A palette chosen for the brand, not the purple-and-cyan default.",
+      "fix": "Remove purple, violet and cyan gradients. Pick one brand accent, a neutral background and text colours, and use the accent sparingly."
+    },
+    {
+      "id": "aphoristic-cadence",
+      "name": "Aphoristic-cadence copy",
+      "category": "slop",
+      "goal": "A voice, not a formula.",
+      "fix": "Rewrite the repeated “X. No Y.” and “Not a feature. A platform.” lines as plain sentences. Keep one at most."
+    },
+    {
+      "id": "blinking-cursor",
+      "name": "Decorative blinking cursor",
+      "category": "slop",
+      "goal": "No fake typing where nothing can be typed.",
+      "fix": "Remove the animated blinking cursor from headings and hero text. Let the copy stand still."
+    },
+    {
+      "id": "border-accent-on-rounded",
+      "name": "Border accent on rounded element",
+      "category": "slop",
+      "goal": "Rounded elements keep a clean, even edge.",
+      "fix": "Drop the thick accent border from rounded cards, or drop the radius. Use a full hairline border if the card needs an edge."
+    },
+    {
+      "id": "bounce-easing",
+      "name": "Bounce or elastic easing",
+      "category": "slop",
+      "goal": "Motion that decelerates smoothly, like a real object.",
+      "fix": "Replace bounce, elastic and overshooting cubic-bezier curves with an ease-out curve such as cubic-bezier(0.22, 1, 0.36, 1)."
+    },
+    {
+      "id": "codex-grid-background",
+      "name": "Decorative grid-line background",
+      "category": "slop",
+      "goal": "Grid lines only where something is being measured.",
+      "fix": "Remove the decorative hairline grid background. Keep grids for canvases, maps or technical drawings."
+    },
+    {
+      "id": "cream-palette",
+      "name": "Cream / beige palette",
+      "category": "slop",
+      "goal": "A background colour that comes from a deliberate palette.",
+      "fix": "Replace the reflexive cream or beige page colour with a background chosen from the brand palette, plain white or a considered dark."
+    },
+    {
+      "id": "dark-glow",
+      "name": "Glowing shadow accents",
+      "category": "slop",
+      "goal": "Depth from neutral shadows, not coloured halos.",
+      "fix": "Remove zero-offset coloured box-shadow and text-shadow glows. Use a soft neutral shadow with a vertical offset for elevation."
+    },
+    {
+      "id": "em-dash-overuse",
+      "name": "Em-dash overuse",
+      "category": "slop",
+      "goal": "Copy with a natural rhythm.",
+      "fix": "Replace most long dashes in body copy with full stops, commas, colons or parentheses."
+    },
+    {
+      "id": "extreme-negative-tracking",
+      "name": "Crushed letter spacing",
+      "category": "slop",
+      "goal": "Display type tight but still legible.",
+      "fix": "Ease letter-spacing on headlines back to about -0.02em to -0.04em so letters keep their shapes."
+    },
+    {
+      "id": "flat-type-hierarchy",
+      "name": "Flat type hierarchy",
+      "category": "slop",
+      "goal": "Headings clearly outrank body text at a glance.",
+      "fix": "Use a type scale with steps of at least 1.25x between body, subheadings and headings, and add one decisive jump for the main headline."
+    },
+    {
+      "id": "gpt-thin-border-wide-shadow",
+      "name": "Hairline border with wide shadow",
+      "category": "slop",
+      "goal": "Cards with one clear way of standing out.",
+      "fix": "On rows of cards, use either a hairline border or a soft shadow, not both on every card."
+    },
+    {
+      "id": "gradient-text",
+      "name": "Gradient text",
+      "category": "slop",
+      "goal": "Text in one solid colour that reads instantly.",
+      "fix": "Fill headings and numbers with one solid colour instead of a gradient. Put emphasis in weight, size or one accent colour."
+    },
+    {
+      "id": "hero-eyebrow-chip",
+      "name": "Hero eyebrow / pill chip",
+      "category": "slop",
+      "goal": "A hero that opens with the headline itself.",
+      "fix": "Delete the tiny uppercase label or pill chip above the hero headline. Work any important words into the headline or the line below it."
+    },
+    {
+      "id": "icon-tile-stack",
+      "name": "Icon tile stacked above heading",
+      "category": "slop",
+      "goal": "Feature lists that don't follow the stock card template.",
+      "fix": "Remove the rounded icon tile above each heading. Put a plain icon beside the heading, or drop the icons and lead with the text."
+    },
+    {
+      "id": "italic-serif-display",
+      "name": "Italic serif display headline",
+      "category": "slop",
+      "goal": "A headline voice that isn't the stock startup look.",
+      "fix": "Set the big headline and its accent words upright (roman). Keep the colour accent, or move to a non-serif display face."
+    },
+    {
+      "id": "kicker-above-heading",
+      "name": "Kicker / eyebrow label above heading",
+      "category": "slop",
+      "goal": "Headings that carry their own weight.",
+      "fix": "Delete the small tracked label sitting above each heading. If the words matter, fold them into the heading or the first sentence."
+    },
+    {
+      "id": "marketing-buzzword",
+      "name": "Marketing buzzword",
+      "category": "slop",
+      "goal": "Copy that says what the product literally does.",
+      "fix": "Replace words like streamline, empower, supercharge, world-class and cutting-edge with a specific verb and noun."
+    },
+    {
+      "id": "marquee",
+      "name": "Auto-scrolling marquee",
+      "category": "slop",
+      "goal": "Content that moves only when the reader moves it.",
+      "fix": "Replace the auto-scrolling marquee with a static row, or scroll it with the page and stop it when not visible. Respect prefers-reduced-motion."
+    },
+    {
+      "id": "monotonous-spacing",
+      "name": "Monotonous spacing",
+      "category": "slop",
+      "goal": "Spacing with rhythm: tight inside groups, generous between sections.",
+      "fix": "Use a spacing scale. Shrink gaps between related items and grow the space between sections so the structure is visible."
+    },
+    {
+      "id": "nested-cards",
+      "name": "Nested cards",
+      "category": "slop",
+      "goal": "One level of containers; content grouped by space and type.",
+      "fix": "Flatten cards inside cards. Keep the outer section plain and use spacing, headings and dividers to group the items."
+    },
+    {
+      "id": "numbered-section-labels",
+      "name": "Tiny numbered section labels",
+      "category": "slop",
+      "goal": "Structure that comes from content, not chapter numbers.",
+      "fix": "Remove the small 01, 02, 03 labels beside section headings. Let headings and spacing show the order."
+    },
+    {
+      "id": "oversized-h1",
+      "name": "Oversized hero headline",
+      "category": "slop",
+      "goal": "A first screen with room for more than one sentence.",
+      "fix": "Set long headlines smaller, around 40 to 64px on desktop, or cut the headline to a few words if it must be huge."
+    },
+    {
+      "id": "overused-font",
+      "name": "Overused font",
+      "category": "slop",
+      "goal": "Type that is recognisably yours, not the default of every generated site.",
+      "fix": "Replace Inter, Roboto, Geist, Fraunces, Plus Jakarta Sans or Space Grotesk with a less common face that suits the brand, and pair it with one body face."
+    },
+    {
+      "id": "pulsing-dot",
+      "name": "Pulsing status dot",
+      "category": "slop",
+      "goal": "Status indicators that only move when the data does.",
+      "fix": "Stop the decorative pulse. Show a static dot with a clear label, and animate only when the status really changes."
+    },
+    {
+      "id": "radial-halo",
+      "name": "Radial-gradient background halo",
+      "category": "slop",
+      "goal": "Backgrounds that are surfaces, not glowing clouds.",
+      "fix": "Remove the saturated radial-gradient glow behind sections. Use a solid background or a very subtle tonal shift."
+    },
+    {
+      "id": "radial-spotlight-glow",
+      "name": "Decorative radial spotlight glow",
+      "category": "slop",
+      "goal": "Sections lit by their content, not a floating coloured haze.",
+      "fix": "Delete the accent-coloured radial spotlight behind the hero. If the surface needs interest, use a real image or material texture."
+    },
+    {
+      "id": "repeating-stripes-gradient",
+      "name": "Repeating-gradient stripes",
+      "category": "slop",
+      "goal": "Surfaces with deliberate texture or none.",
+      "fix": "Remove repeating-gradient stripes used as decoration. Use a plain surface or a real texture image."
+    },
+    {
+      "id": "shape-assembled-illustration",
+      "name": "Shape-assembled illustration",
+      "category": "slop",
+      "goal": "Hero visuals that are real artwork, photography or product.",
+      "fix": "Replace the large SVG scene built from primitive shapes with a photograph, a product screenshot or a properly drawn illustration."
+    },
+    {
+      "id": "side-tab",
+      "name": "Side-tab accent border",
+      "category": "slop",
+      "goal": "Cards stand apart without a thick coloured stripe down one side.",
+      "fix": "Remove the one-sided accent border. Separate cards with spacing, a hairline border on all sides or a subtle background change."
+    },
+    {
+      "id": "theater-slop-phrase",
+      "name": "Theater framing copy",
+      "category": "slop",
+      "goal": "Copy that makes a plain claim.",
+      "fix": "Replace “X is just theater” framing with a direct statement of what the thing does or doesn't do."
+    },
+    {
+      "id": "all-caps-body",
+      "name": "All-caps body text",
+      "category": "quality",
+      "goal": "Long text in normal case.",
+      "fix": "Remove text-transform: uppercase from paragraphs. Keep capitals for short labels only."
+    },
+    {
+      "id": "body-text-viewport-edge",
+      "name": "Body text touching viewport edge",
+      "category": "quality",
+      "goal": "Text never touches the screen edge.",
+      "fix": "Wrap content in a container with at least 16px (ideally 24px) side padding, or constrain the widest element so it can't overflow."
+    },
+    {
+      "id": "broken-image",
+      "name": "Broken or placeholder image",
+      "category": "quality",
+      "goal": "Every image loads.",
+      "fix": "Give each img a real src, or remove the tag. Check the paths and that the files are deployed."
+    },
+    {
+      "id": "buried-raster",
+      "name": "Raster buried under a wash or opacity",
+      "category": "quality",
+      "goal": "Every image you ship is visible.",
+      "fix": "Lighten the wash over the background image below 90% opacity or use a blend mode, or remove the image you aren't showing."
+    },
+    {
+      "id": "clipped-overflow-container",
+      "name": "Positioned child clipped by overflow container",
+      "category": "quality",
+      "goal": "Menus, tooltips and popovers aren't cut off.",
+      "fix": "Remove overflow: hidden from the container, or move the positioned menu or tooltip outside the clipping element."
+    },
+    {
+      "id": "content-hidden-at-rest",
+      "name": "Content invisible at rest",
+      "category": "quality",
+      "goal": "Content visible even if an animation never runs.",
+      "fix": "Make text visible by default and let JavaScript add the entrance animation, instead of starting at opacity 0 and waiting for a script."
+    },
+    {
+      "id": "cramped-padding",
+      "name": "Cramped padding",
+      "category": "quality",
+      "goal": "Text inside boxes has room to breathe.",
+      "fix": "Add at least 12 to 16px of padding inside bordered or coloured containers."
+    },
+    {
+      "id": "design-system-color",
+      "name": "Color outside DESIGN.md",
+      "category": "quality",
+      "goal": "Colours match the documented palette.",
+      "fix": "Use a palette token from DESIGN.md, or add this colour there if it is intentional."
+    },
+    {
+      "id": "design-system-font",
+      "name": "Font outside DESIGN.md",
+      "category": "quality",
+      "goal": "Fonts match the documented design system.",
+      "fix": "Use a font from DESIGN.md, or add this one there if it is intentional."
+    },
+    {
+      "id": "design-system-font-size",
+      "name": "Font size outside DESIGN.md",
+      "category": "quality",
+      "goal": "Font sizes sit on the documented type ramp.",
+      "fix": "Use a size step from DESIGN.md, or add this step there if it is intentional."
+    },
+    {
+      "id": "design-system-radius",
+      "name": "Radius outside DESIGN.md",
+      "category": "quality",
+      "goal": "Corner radii match the documented scale.",
+      "fix": "Use a radius token from DESIGN.md, or add this value there if it is intentional."
+    },
+    {
+      "id": "edge-flush-cards",
+      "name": "Cards flush against the scroller edge",
+      "category": "quality",
+      "goal": "Cards in scrolling rows keep the same inset on both sides.",
+      "fix": "Size the scrolling panel to its container and add the same padding on both ends so the first and last cards aren't cut off."
+    },
+    {
+      "id": "first-viewport-column-overflow",
+      "name": "One column stretches the first viewport",
+      "category": "quality",
+      "goal": "Both columns of the opening section fit together.",
+      "fix": "Balance the hero columns: cap the tall one, or move its extra content below the opening row."
+    },
+    {
+      "id": "gray-on-color",
+      "name": "Gray text on colored background",
+      "category": "quality",
+      "goal": "Text on colour stays crisp.",
+      "fix": "Replace grey text on coloured backgrounds with a darker shade of that colour, or white or near-white."
+    },
+    {
+      "id": "heading-rhythm",
+      "name": "Heading crowded against the previous block",
+      "category": "quality",
+      "goal": "Each heading sits closer to its own content than to the block above.",
+      "fix": "Increase the space above headings so it is larger than the space below them."
+    },
+    {
+      "id": "justified-text",
+      "name": "Justified text",
+      "category": "quality",
+      "goal": "Even word spacing in narrow columns.",
+      "fix": "Use text-align: left, or add hyphens: auto if the text must stay justified."
+    },
+    {
+      "id": "layout-transition",
+      "name": "Layout property animation",
+      "category": "quality",
+      "goal": "Smooth animation that doesn't make the browser re-lay out the page.",
+      "fix": "Animate transform and opacity instead of width, height, padding or margin. For expanding panels, animate grid-template-rows."
+    },
+    {
+      "id": "line-length",
+      "name": "Line length too long",
+      "category": "quality",
+      "goal": "Lines of about 60 to 75 characters.",
+      "fix": "Add a max-width of about 65ch to paragraphs and text columns."
+    },
+    {
+      "id": "low-contrast",
+      "name": "Low contrast text",
+      "category": "quality",
+      "goal": "All text meets WCAG AA: 4.5:1 for body, 3:1 for large text.",
+      "fix": "Darken the text or lighten the background (or the reverse on dark pages) until the contrast ratio passes."
+    },
+    {
+      "id": "organic-clip-path",
+      "name": "Organic contour drawn as clip-path",
+      "category": "quality",
+      "goal": "Organic shapes that look like the real material.",
+      "fix": "Replace many-pointed clip-path polygons with a cut-out image or an alpha matte from the real photo. Keep clip-path for simple geometry."
+    },
+    {
+      "id": "repeated-container-text",
+      "name": "Same text repeated inside one container",
+      "category": "quality",
+      "goal": "Each card says each thing once.",
+      "fix": "Remove the duplicate labels repeated inside one card and keep the one where it matters most."
+    },
+    {
+      "id": "script-error",
+      "name": "Uncaught script error on load",
+      "category": "quality",
+      "goal": "The page loads without JavaScript errors.",
+      "fix": "Open the browser console on the page, fix the uncaught error it shows, and reload until the console is clean."
+    },
+    {
+      "id": "skipped-heading",
+      "name": "Skipped heading level",
+      "category": "quality",
+      "goal": "Headings in order, h1 then h2 then h3.",
+      "fix": "Change the heading tags so no level is skipped, and style them with CSS instead of picking tags by size."
+    },
+    {
+      "id": "text-occlusion",
+      "name": "Text occluded by an overlapping element",
+      "category": "quality",
+      "goal": "No text covered by another layer.",
+      "fix": "Move the overlapping box or image off the text, or give the text its own space with padding or a different stacking order."
+    },
+    {
+      "id": "text-overflow",
+      "name": "Content overflowing its container",
+      "category": "quality",
+      "goal": "Content stays inside its container.",
+      "fix": "Let text wrap, set max-width or overflow-wrap: anywhere on long strings, or give the region a visible scroll."
+    },
+    {
+      "id": "tight-leading",
+      "name": "Tight line height",
+      "category": "quality",
+      "goal": "Comfortable line spacing in paragraphs.",
+      "fix": "Set line-height to 1.5 to 1.7 for body text, and at least 1.1 for multi-line headings."
+    },
+    {
+      "id": "tiny-text",
+      "name": "Tiny body text",
+      "category": "quality",
+      "goal": "Body text at a readable size.",
+      "fix": "Set body text to at least 14px, ideally 16px."
+    },
+    {
+      "id": "undersized-ui-text",
+      "name": "Undersized functional text",
+      "category": "quality",
+      "goal": "Links, buttons and labels large enough to read and tap.",
+      "fix": "Raise functional text such as links, buttons, nav and table cells to at least 12px."
+    },
+    {
+      "id": "wide-tracking",
+      "name": "Wide letter spacing on body text",
+      "category": "quality",
+      "goal": "Body text with natural letter spacing.",
+      "fix": "Set letter-spacing on body text to 0 to 0.02em. Keep wide tracking for short uppercase labels."
+    }
+  ]
+}

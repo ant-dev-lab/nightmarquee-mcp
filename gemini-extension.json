@@ -1,0 +1,13 @@
+{
+  "name": "nightmarquee",
+  "version": "0.1.8",
+  "description": "Cinematic website designs with build prompts and starters, plus a check for AI-look problems.",
+  "mcpServers": {
+    "nightmarquee": {
+      "httpUrl": "https://mcp.nightmarquee.com/mcp",
+      "oauth": {
+        "enabled": true
+      }
+    }
+  }
+}
