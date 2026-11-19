@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFil
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildSkills, checkOutDir, main } from "../scripts/build-skills.mjs";
+import { AI_LOOK, buildSkills, checkOutDir, main, readServedSlugs } from "../scripts/build-skills.mjs";
 import { inMainRepo, pkgRoot, repoRoot } from "./main-repo";
 
 const catalog = {
@@ -110,7 +110,7 @@ describe("build-skills out dir guard", () => {
     await main([dir], fakeFetch);
 
     expect(existsSync(join(dir, "skills", "nightmarquee-retired"))).toBe(false);
-    const expected = buildSkills(catalog);
+    const expected = buildSkills(catalog, AI_LOOK, readServedSlugs());
     expect(expected.length).toBeGreaterThan(1);
     for (const { path, content } of expected) expect(readFileSync(join(dir, path), "utf8"), path).toBe(content);
     expect(readdirSync(join(dir, "skills")).sort()).toEqual([...new Set(expected.map((s) => s.path.split("/")[1]))].sort());

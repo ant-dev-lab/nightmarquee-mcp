@@ -33,6 +33,32 @@ const REMOTE = "https://mcp.nightmarquee.com/mcp";
 export const VERCEL_PLAN_LINE =
   "Vercel's free plan (Hobby) is for personal, non-commercial sites. A business site needs a paid Vercel plan.";
 
+/**
+ * The shadcn registry's setup lines (R18), word for word what src/lib/copy/registry.ts holds; a test compares them in
+ * the main repo. The skills carry them as another way in beside `get_starter`.
+ */
+export const SETUP_FREE = (slug) => `npx shadcn@latest add https://nightmarquee.com/r/${slug}.json`;
+
+/** The paid line, by the namespace the components.json block below sets. */
+export const SETUP_PAID = (slug) => `npx shadcn@latest add @nightmarquee/${slug}`;
+
+export const SETUP_PAID_JSON = `{
+  "registries": {
+    "@nightmarquee": {
+      "url": "https://nightmarquee.com/r/{name}.json",
+      "headers": {
+        "X-License-Key": "\${NIGHTMARQUEE_LICENSE_KEY}"
+      }
+    }
+  }
+}`;
+
+export const SETUP_PAID_ENV = `NIGHTMARQUEE_LICENSE_KEY=
+# Put your key after the equals sign. Do not commit this file.`;
+
+export const SETUP_PAID_WARNING =
+  "With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key should leave the block out and add free designs by their address: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json";
+
 /** A YAML double-quoted scalar; JSON string escapes are valid YAML. */
 const q = (value) => JSON.stringify(value);
 
@@ -71,6 +97,34 @@ Then:
 4. ${FOOTAGE_STEP("<slug>")}
 5. Build the page the prompt describes, or adapt the starter, then compare it with the demo.
 
+## With the shadcn registry
+
+A design the registry serves also installs into a project with the shadcn command line tool, without the MCP server. Free designs need no account:
+
+\`\`\`
+${SETUP_FREE("<slug>")}
+\`\`\`
+
+Paid designs need a key. The person makes one on their account page at ${SITE}/account#registry-keys; never ask for it in chat. Add this to \`components.json\`:
+
+\`\`\`json
+${SETUP_PAID_JSON}
+\`\`\`
+
+Then the key goes in \`.env.local\`, which must not be committed:
+
+\`\`\`
+${SETUP_PAID_ENV}
+\`\`\`
+
+Then add the design:
+
+\`\`\`
+${SETUP_PAID("<slug>")}
+\`\`\`
+
+${SETUP_PAID_WARNING}
+
 ## What next
 
 Each of these is its own skill:
@@ -98,7 +152,14 @@ const STARTER_STEP =
 const FOOTAGE_STEP = (slug) =>
   `For the demo's clips and images: \`get_footage(slug)\`. The starter already plays the clips online, so download them only to work offline or to build from the prompt. Save each file into \`public/drops/${slug}/\` under its \`name\`, while the links work (ten minutes); a starter then uses them when started with \`NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev\`. Skip the files named \`*-original.mp4\`: they are the large original masters, needed only to re-encode. Quote each link in the shell, since it contains \`&\`: \`curl -fL --create-dirs -o public/drops/${slug}/hero.mp4 "<url>"\`.`;
 
-function freePrompt(p) {
+/** The shadcn line of a free design's skill, only when the registry serves that design (R19). */
+const shadcnSection = (slug) => `## Install with shadcn
+
+\`${SETUP_FREE(slug)}\`. It needs no account and no key. It adds the design's files to the project the person is in.
+
+`;
+
+function freePrompt(p, served) {
   const page = p.pageUrl ?? `${SITE}/p/${p.slug}`;
   return skill(
     `nightmarquee-${p.slug}`,
@@ -124,7 +185,7 @@ These need a connected NightMarquee account.
 - Starter: \`get_starter(slug: "${p.slug}")\`. ${STARTER_STEP.replace("In a shell, when the person wants to run a starter: ", "").replaceAll("<slug>", p.slug).replace("`get_starter(slug)` returns", "It returns")}
 - Footage: \`get_footage(slug: "${p.slug}")\`. ${FOOTAGE_STEP(p.slug).replace("For the demo's clips and images: `get_footage(slug)`. ", "")}
 
-Build the page, then compare it with the demo. Prompt licence: ${SITE}/license
+${served ? shadcnSection(p.slug) : ""}Build the page, then compare it with the demo. Prompt licence: ${SITE}/license
 `
   );
 }
@@ -429,11 +490,15 @@ Once the site is live, offer the public check from \`nightmarquee-ai-look-test\`
   );
 }
 
-/** Every file the catalog implies, as { path, content }. Pure, for tests. */
-export function buildSkills(catalog, aiLook = AI_LOOK) {
+/**
+ * Every file the catalog implies, as { path, content }. Pure, for tests. `servedSlugs` are the designs the shadcn
+ * registry serves: only those free designs get the install line (R19).
+ */
+export function buildSkills(catalog, aiLook = AI_LOOK, servedSlugs = []) {
+  const served = new Set(servedSlugs);
   return [
     guide(catalog),
-    ...catalog.prompts.filter((p) => p.tier === "free").map(freePrompt),
+    ...catalog.prompts.filter((p) => p.tier === "free").map((p) => freePrompt(p, served.has(p.slug))),
     ...aiLookTest(aiLook),
     buildSkill(),
     runLocally(),
@@ -444,6 +509,28 @@ export function buildSkills(catalog, aiLook = AI_LOOK) {
 
 /** This package's root, the default out dir. */
 const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+/**
+ * The slugs the registry serves, from src/lib/registry/served.json of the main repo, found from this package's
+ * place at packages/nightmarquee-mcp (the way test/main-repo.ts finds it). Empty where there is no main repo (the
+ * public copy), or when served.json is from another mapping version than src/lib/registry/item.ts, which serves nothing.
+ * As src/lib/registry/catalogue.ts does, a slug counts only while src/lib/source/packs.json still names the bundle
+ * served.json recorded for it.
+ */
+export function readServedSlugs(repoRoot = resolve(PKG_ROOT, "..", "..")) {
+  const servedFile = join(repoRoot, "src", "lib", "registry", "served.json");
+  const itemFile = join(repoRoot, "src", "lib", "registry", "item.ts");
+  const packsFile = join(repoRoot, "src", "lib", "source", "packs.json");
+  if (resolve(repoRoot, "packages", "nightmarquee-mcp") !== PKG_ROOT) return [];
+  if (!existsSync(servedFile) || !existsSync(itemFile) || !existsSync(packsFile)) return [];
+  const served = JSON.parse(readFileSync(servedFile, "utf8"));
+  const version = readFileSync(itemFile, "utf8").match(/export const REGISTRY_MAPPING_VERSION\s*=\s*(\d+)/);
+  if (!version) throw new Error(`${itemFile} no longer exports REGISTRY_MAPPING_VERSION; update readServedSlugs`);
+  if (served.mappingVersion !== Number(version[1])) return [];
+  if (!served.items || typeof served.items !== "object") throw new Error(`${servedFile} has no items map; update readServedSlugs`);
+  const packs = JSON.parse(readFileSync(packsFile, "utf8"));
+  return Object.keys(served.items).filter((slug) => packs[slug]?.key === served.items[slug]);
+}
 
 /** The `name` in a JSON file, or undefined when the file is missing. */
 function jsonName(file) {
@@ -480,7 +567,7 @@ function parseArgs(argv) {
   return { dryRun: flags.length > 0, out: resolve(dirs[0] ?? PKG_ROOT) };
 }
 
-export async function main(argv = process.argv.slice(2), fetchImpl = fetch) {
+export async function main(argv = process.argv.slice(2), fetchImpl = fetch, servedSlugs = readServedSlugs()) {
   const { dryRun, out } = parseArgs(argv);
   checkOutDir(out);
   const res = await fetchImpl(`${process.env.NIGHTMARQUEE_API ?? SITE}/api/mcp/catalog`);
@@ -489,7 +576,7 @@ export async function main(argv = process.argv.slice(2), fetchImpl = fetch) {
   // An empty or broken answer would delete every per-design skill folder, so it stops the build here.
   const free = Array.isArray(catalog?.prompts) ? catalog.prompts.filter((p) => p.tier === "free").length : 0;
   if (free === 0) throw new Error("the catalog lists no free designs; refusing to write skills or delete any folder");
-  const skills = buildSkills(catalog);
+  const skills = buildSkills(catalog, AI_LOOK, servedSlugs);
 
   const keep = new Set(skills.map((s) => s.path.split("/")[1]));
   const dir = join(out, "skills");
