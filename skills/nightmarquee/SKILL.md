@@ -1,6 +1,6 @@
 ---
 name: "nightmarquee"
-description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 85 builds (ecommerce, landing, portfolio, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
+description: "Build cinematic, art-directed websites and apps from NightMarquee designs: 87 builds (ecommerce, landing, portfolio, saas, hero, 3d, mobile, dashboard), each with a live demo, a build prompt, a runnable starter for many, and the footage the demos play. Use when someone asks for a cinematic landing page, a hero section, a scroll-driven video site, a 3D or WebGL page, or a page like a NightMarquee demo."
 ---
 
 # NightMarquee
@@ -24,6 +24,44 @@ Then:
 4. For the demo's clips and images: `get_footage(slug)`. The starter already plays the clips online, so download them only to work offline or to build from the prompt. Save each file into `public/drops/<slug>/` under its `name`, while the links work (ten minutes); a starter then uses them when started with `NEXT_PUBLIC_FOOTAGE_LOCAL=1 npm run dev`. Skip the files named `*-original.mp4`: they are the large original masters, needed only to re-encode. Quote each link in the shell, since it contains `&`: `curl -fL --create-dirs -o public/drops/<slug>/hero.mp4 "<url>"`.
 5. Build the page the prompt describes, or adapt the starter, then compare it with the demo.
 
+## With the shadcn registry
+
+A design the registry serves also installs into a project with the shadcn command line tool, without the MCP server. Free designs need no account:
+
+```
+npx shadcn@latest add https://nightmarquee.com/r/<slug>.json
+```
+
+Paid designs need a key. The person makes one on their account page at https://nightmarquee.com/account#registry-keys; never ask for it in chat. Add this to `components.json`:
+
+```json
+{
+  "registries": {
+    "@nightmarquee": {
+      "url": "https://nightmarquee.com/r/{name}.json",
+      "headers": {
+        "X-License-Key": "${NIGHTMARQUEE_LICENSE_KEY}"
+      }
+    }
+  }
+}
+```
+
+Then the key goes in `.env.local`, which must not be committed:
+
+```
+NIGHTMARQUEE_LICENSE_KEY=
+# Put your key after the equals sign. Do not commit this file.
+```
+
+Then add the design:
+
+```
+npx shadcn@latest add @nightmarquee/<slug>
+```
+
+With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key should leave the block out and add free designs by their address: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json
+
 ## What next
 
 Each of these is its own skill:
@@ -38,4 +76,4 @@ Free designs need no account. Starters and footage need a connected account, and
 
 ## Without the MCP server
 
-Free designs are open on their pages: ask the person to open https://nightmarquee.com/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: `ninety-seconds`, `side-eye`, `echo-cave`, `jacquard-hall`, `snail-courier`, `lathe-lacquer`, `leaf-assay`, `ternary-systems`, `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. A signed-in person can also download starters and footage on the design's page.
+Free designs are open on their pages: ask the person to open https://nightmarquee.com/p/<slug>, choose their tool and copy the prompt. The page loads it in the browser, so fetching the page will not show it. The free ones today: `roll-call`, `ninety-seconds`, `side-eye`, `echo-cave`, `jacquard-hall`, `snail-courier`, `lathe-lacquer`, `leaf-assay`, `ternary-systems`, `fieldnote`, `sumi-atelier`, `wren`, `glasshouse-nine`, `aetheris-voyage`, `nordlys-fintech`, `solstice-festival`, `lumen-observatory`. A signed-in person can also download starters and footage on the design's page.

@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { AI_LOOK, buildSkills, MAKE_IT_MINE_PATHS, PUBLISHED_TOOLS, VERCEL_PLAN_LINE } from "../scripts/build-skills.mjs";
+import { AI_LOOK, buildSkills, MAKE_IT_MINE_PATHS, PUBLISHED_TOOLS, readServedSlugs, VERCEL_PLAN_LINE } from "../scripts/build-skills.mjs";
 import snippets from "./fixtures/starter-snippets.json";
 import { inMainRepo } from "./main-repo";
 
@@ -89,6 +91,7 @@ describe("buildSkills", () => {
     expect(md).toContain("npx -y nightmarquee"); // the older way, for a tool that cannot add a remote address
     expect(md).toContain("codex mcp add nightmarquee --url https://mcp.nightmarquee.com/mcp");
     expect(md).toContain("`nightmarquee-ai-look-test`");
+    expect(md).toContain("account page at https://nightmarquee.com/account#registry-keys;");
   });
 
   it("puts footage where the starter and the prompt read it, skips the masters, and gives the starter's limits", () => {
@@ -401,5 +404,70 @@ describe("the flow skills", () => {
     const guide = md("nightmarquee");
     for (const name of ["nightmarquee-ai-look-test", ...flow]) expect(guide).toContain(`\`${name}\``);
     expect(frontmatter(guide).description.length).toBeLessThanOrEqual(1024);
+  });
+});
+
+describe("the shadcn registry lines (R18, R19)", () => {
+  const FREE = (slug: string) => `npx shadcn@latest add https://nightmarquee.com/r/${slug}.json`;
+  const served = ["glasshouse-nine", "oud-ember"];
+  const skills = buildSkills(catalog, undefined, served);
+  const byPath = Object.fromEntries(skills.map((s) => [s.path, s.content]));
+  const guide = byPath["skills/nightmarquee/SKILL.md"];
+
+  it("puts the free line in the skill of each free design the registry serves", () => {
+    expect(byPath["skills/nightmarquee-glasshouse-nine/SKILL.md"]).toContain(FREE("glasshouse-nine"));
+  });
+
+  it("leaves the line out of a free design's skill when the registry does not serve it, and never lists a paid design", () => {
+    const none = Object.fromEntries(buildSkills(catalog, undefined, []).map((s) => [s.path, s.content]));
+    expect(none["skills/nightmarquee-glasshouse-nine/SKILL.md"]).not.toContain("shadcn");
+    expect(Object.keys(byPath).some((p) => p.includes("oud-ember"))).toBe(false);
+  });
+
+  it("gives the guide both setups: the free line and the object form with the key in .env.local", () => {
+    expect(guide).toContain(FREE("<slug>"));
+    expect(guide).toContain('"X-License-Key": "${NIGHTMARQUEE_LICENSE_KEY}"');
+    expect(guide).toContain("https://nightmarquee.com/r/{name}.json");
+    expect(guide).toContain("npx shadcn@latest add @nightmarquee/<slug>");
+    expect(guide).toContain("NIGHTMARQUEE_LICENSE_KEY=");
+    expect(guide).toContain(".env.local");
+    expect(guide).toMatch(/stops unless NIGHTMARQUEE_LICENSE_KEY is set/);
+  });
+
+  it.skipIf(!inMainRepo)("uses the words of src/lib/copy/registry.ts, the one copy module", async () => {
+    const { REGISTRY } = await import("../../../src/lib/copy/registry");
+    expect(guide).toContain(REGISTRY.setupFree("<slug>"));
+    expect(guide).toContain(REGISTRY.setupPaidJson);
+    expect(guide).toContain(REGISTRY.setupPaidEnv);
+    expect(guide).toContain(REGISTRY.setupPaid("<slug>"));
+    expect(guide).toContain(REGISTRY.paidCommandIntro);
+    expect(guide).toContain(REGISTRY.setupPaidWarning);
+  });
+
+  it("carries no key and nothing shaped like one", () => {
+    for (const { content } of skills) {
+      expect(content).not.toContain("nm_reg_");
+      expect(content).not.toMatch(/[A-Za-z0-9_-]{43}/);
+    }
+  });
+
+  it("keeps the guide and each design skill under the size limit", () => {
+    for (const { path, content } of skills.filter((s) => s.path.endsWith("/SKILL.md"))) {
+      expect(content.length, path).toBeLessThan(6000);
+    }
+  });
+});
+
+describe("which designs the build script lists as served", () => {
+  it.skipIf(!inMainRepo)("reads src/lib/registry/served.json of the main repo", () => {
+    const file = JSON.parse(readFileSync(new URL("../../../src/lib/registry/served.json", import.meta.url), "utf8"));
+    const packs = JSON.parse(readFileSync(new URL("../../../src/lib/source/packs.json", import.meta.url), "utf8"));
+    const current = Object.keys(file.items).filter((slug) => packs[slug]?.key === file.items[slug]);
+    expect(current.length).toBeGreaterThan(0);
+    expect(readServedSlugs()).toEqual(current);
+  });
+
+  it("is empty where there is no main repo to read, so the public copy never claims a design", () => {
+    expect(readServedSlugs(join(tmpdir(), "nm-no-such-repo"))).toEqual([]);
   });
 });
