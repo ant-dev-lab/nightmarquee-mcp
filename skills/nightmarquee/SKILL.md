@@ -29,7 +29,7 @@ Then:
 A design the registry serves also installs into a project with the shadcn command line tool, without the MCP server. Free designs need no account:
 
 ```
-npx shadcn@latest add https://nightmarquee.com/r/<slug>.json
+npx shadcn@latest add @nightmarquee/<slug>
 ```
 
 Paid designs need a key. The person makes one on their account page at https://nightmarquee.com/account#registry-keys; never ask for it in chat. Add this to `components.json`:
@@ -60,7 +60,7 @@ Then add the design:
 npx shadcn@latest add @nightmarquee/<slug>
 ```
 
-With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key should leave the block out and add free designs by their address: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json
+With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key can still add free designs by their address, which works with the block in place: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json.
 
 ## What next
 

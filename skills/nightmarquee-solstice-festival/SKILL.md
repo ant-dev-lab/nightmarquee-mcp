@@ -25,6 +25,6 @@ These need a connected NightMarquee account.
 
 ## Install with shadcn
 
-`npx shadcn@latest add https://nightmarquee.com/r/solstice-festival.json`. It needs no account and no key. It adds the design's files to the project the person is in.
+`npx shadcn@latest add @nightmarquee/solstice-festival`. It needs no account and no key. It adds the design's files to the project the person is in.
 
 Build the page, then compare it with the demo. Prompt licence: https://nightmarquee.com/license
