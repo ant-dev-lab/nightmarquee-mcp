@@ -408,7 +408,7 @@ describe("the flow skills", () => {
 });
 
 describe("the shadcn registry lines (R18, R19)", () => {
-  const FREE = (slug: string) => `npx shadcn@latest add https://nightmarquee.com/r/${slug}.json`;
+  const FREE = (slug: string) => `npx shadcn@latest add @nightmarquee/${slug}`;
   const served = ["glasshouse-nine", "oud-ember"];
   const skills = buildSkills(catalog, undefined, served);
   const byPath = Object.fromEntries(skills.map((s) => [s.path, s.content]));

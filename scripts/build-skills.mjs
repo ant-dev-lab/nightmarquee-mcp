@@ -37,7 +37,7 @@ export const VERCEL_PLAN_LINE =
  * The shadcn registry's setup lines (R18), word for word what src/lib/copy/registry.ts holds; a test compares them in
  * the main repo. The skills carry them as another way in beside `get_starter`.
  */
-export const SETUP_FREE = (slug) => `npx shadcn@latest add https://nightmarquee.com/r/${slug}.json`;
+export const SETUP_FREE = (slug) => `npx shadcn@latest add @nightmarquee/${slug}`;
 
 /** The paid line, by the namespace the components.json block below sets. */
 export const SETUP_PAID = (slug) => `npx shadcn@latest add @nightmarquee/${slug}`;
@@ -57,7 +57,7 @@ export const SETUP_PAID_ENV = `NIGHTMARQUEE_LICENSE_KEY=
 # Put your key after the equals sign. Do not commit this file.`;
 
 export const SETUP_PAID_WARNING =
-  "With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key should leave the block out and add free designs by their address: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json";
+  "With this block the shadcn command line tool stops unless NIGHTMARQUEE_LICENSE_KEY is set, free designs too. A teammate or a CI run without the key can still add free designs by their address, which works with the block in place: npx shadcn@latest add https://nightmarquee.com/r/<slug>.json.";
 
 /** A YAML double-quoted scalar; JSON string escapes are valid YAML. */
 const q = (value) => JSON.stringify(value);
